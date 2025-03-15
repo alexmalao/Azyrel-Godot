@@ -1,6 +1,4 @@
-# Azyrel: Empyrean's Path
-
-(title subject to change)
+# Azyrel: Path of Ascension (title subject to change)
 
 This project is currently under development, please support it by sending Akyra tons of love!
 
