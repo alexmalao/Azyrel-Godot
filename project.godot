@@ -21,3 +21,4 @@ project/assembly_name="Azyrel"
 [layer_names]
 
 2d_physics/layer_1="GROUND"
+2d_physics/layer_2="Player"
