@@ -3,9 +3,9 @@ extends Node
 class_name PlayerProps
 
 
-@export var GROUND_ACCEL: float = 20000.0
-@export var MIN_GROUND_SPEED: float = 250.0
-@export var MAX_GROUND_SPEED: float = 2500.0
+@export var GROUND_ACCEL: float = 750.0
+@export var MIN_GROUND_SPEED: float = 500.0
+@export var MAX_GROUND_SPEED: float = 1250.0
 
 # speed epnalty for being faster than max ground speed
 @export var GROUND_SPEED_PENALTY: float = 250.0
@@ -15,8 +15,7 @@ class_name PlayerProps
 @export var STOP_SPEED = 100.0
 
 
-@export var JUMP_VELOCITY: float = 750.0
-@export var SPEED: float = 750.0
+@export var JUMP_VELOCITY: float = 1750.0
 
 
 
