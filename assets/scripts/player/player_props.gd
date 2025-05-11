@@ -18,6 +18,9 @@ const JUMP_VEL: float = 1750.0
 const SHORT_JUMP_VEL: float = 1150.0
 
 const AIR_JUMP_VEL: float = 1750.0
+const AIR_X_ACCEL: float = 1250.0
+## minimum horizontal jump speed if a direction is held
+const AIR_MAX_X_SPEED: float = 650.0
 
 
 # Called when the node enters the scene tree for the first time.

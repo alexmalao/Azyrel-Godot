@@ -25,22 +25,31 @@ func _physics_process(delta):
 	self.update_move_data(delta)
 
 
-func _input(event):
+func _input(event: InputEvent):
 	if event.is_action_pressed("jump"):
 		self.instant_jump()
-	if event.is_action_released("jump"):
+	if event.is_action_pressed("jump"):
 		self._ground_jump(event)
 
 
 ## Perform an aerial or wall jump if possible
 func instant_jump():
 	if self._is_airborne() and self.move_data.attempt_jump():
+		var horizontal = int(Input.get_axis("move_left", "move_right"))
+		
+		# perform jump, apply the maximum jump x speed
+		var x_vel = self.velocity.x
+		if horizontal == 1:
+			x_vel = max(x_vel, props.AIR_MAX_X_SPEED)
+		elif horizontal == -1:
+			x_vel = min(x_vel, -props.AIR_MAX_X_SPEED)
 		var jump_vel = min(-props.AIR_JUMP_VEL, self.velocity.y)
-		self.velocity = Vector2(self.velocity.x, jump_vel)
+		self.velocity = Vector2(x_vel, jump_vel)
+		self.move_data.update_direction(x_vel)
 
 
 ## Perform any grounded jump.
-func _ground_jump(event):
+func _ground_jump(event: InputEvent):
 	if self.is_on_floor():
 		var jump_vel = min(-props.JUMP_VEL, self.velocity.y)
 		self.velocity = Vector2(self.velocity.x, jump_vel)
@@ -56,8 +65,14 @@ func update_move(delta: float):
 		int(Input.get_axis("move_left", "move_right")),
 		int(Input.get_axis("move_up", "move_down")))
 	
-	if self.is_on_floor():
+	if self.move_data.on_left_wall:
+		pass
+	elif self.move_data.on_right_wall:
+		pass
+	elif self.is_on_floor():
 		self.velocity = self._get_ground_move(delta, move_input)
+	else:
+		self.velocity = self._get_airborne_move(delta, move_input)
 
 	self.move_and_slide()
 
@@ -74,8 +89,7 @@ func update_move_data(delta: float):
 
 ## Update the character sprite
 func _update_state():
-	if self.is_on_floor():
-		_sprite.flip_h = self.move_data.facing_right
+	_sprite.flip_h = self.move_data.facing_right
 
 
 ## Get the velocity vector for grounded movement
@@ -109,6 +123,24 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		else:
 			rel_magnitude *= pow(delta, props.TRACTION)
 			return Vector2(rel_magnitude * 1, 0)
+
+
+## Get the velocity vector for airborne movement.
+func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
+	var new_x_vel
+	
+	# airborne movement does not apply traction or slowdown
+	var mod_speed = self.velocity.x + move_input.x * props.AIR_X_ACCEL * delta
+	if mod_speed > props.AIR_MAX_X_SPEED:
+		new_x_vel = min(mod_speed, self.velocity.x)  # only allow slowing down
+		new_x_vel = max(new_x_vel, props.AIR_MAX_X_SPEED)  # can't accelerate past max air speed
+	elif mod_speed < -props.AIR_MAX_X_SPEED:
+		new_x_vel = max(mod_speed, self.velocity.x)
+		new_x_vel = min(new_x_vel, props.AIR_MAX_X_SPEED)
+	else:
+		new_x_vel = mod_speed
+	
+	return Vector2(new_x_vel, self.velocity.y)
 
 
 ## Determine if the player is airborne
