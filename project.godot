@@ -70,4 +70,4 @@ dash={
 [physics]
 
 3d/default_gravity=980.0
-2d/default_gravity=5000.0
+2d/default_gravity=4500.0

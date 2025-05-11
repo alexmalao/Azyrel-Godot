@@ -3,10 +3,7 @@ extends CharacterBody2D
 class_name PlayerController
 
 
-const PlayerProps = preload("res://assets/scripts/player/player_props.gd")
-const PlayerMoveData = preload("res://assets/scripts/player/player_move_data.gd")
 var props = PlayerProps
-
 var move_data: PlayerMoveData
 @onready var _sprite = $AnimatedSprite2D
 
@@ -16,6 +13,7 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 
 func _ready():
+	self.props = PlayerProps.new()
 	self.move_data = PlayerMoveData.new()
 
 
