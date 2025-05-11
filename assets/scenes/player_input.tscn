@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b1cgm6ob3p05g"]
+
+[ext_resource type="Script" path="res://assets/scripts/player_input.gd" id="1_qmljs"]
+
+[node name="PlayerInput" type="Node"]
+script = ExtResource("1_qmljs")

@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=3 uid="uid://bg3mk4eh2dt12"]
+[gd_scene load_steps=6 format=3 uid="uid://bg3mk4eh2dt12"]
 
 [ext_resource type="Texture2D" uid="uid://ckbx7gwydao5e" path="res://assets/sprites/tilemap/dev_tilemap.png" id="1_8ev0u"]
-[ext_resource type="Script" path="res://assets/scripts/player/akyra/akyra_controller.gd" id="3_kqvq1"]
-[ext_resource type="PackedScene" uid="uid://ch0ce8h3fk51l" path="res://assets/characters/azyrel.tscn" id="3_t8sy6"]
-[ext_resource type="PackedScene" uid="uid://bweevo8j74d05" path="res://assets/characters/akyra.tscn" id="3_w28km"]
+[ext_resource type="PackedScene" uid="uid://ch0ce8h3fk51l" path="res://assets/scenes/characters/azyrel.tscn" id="3_t8sy6"]
+[ext_resource type="PackedScene" uid="uid://bweevo8j74d05" path="res://assets/scenes/characters/akyra.tscn" id="3_tr46x"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tacab"]
 texture = ExtResource("1_8ev0u")
@@ -50,12 +49,11 @@ format = 2
 layer_0/name = "GROUND"
 layer_0/tile_data = PackedInt32Array(0, 196608, 1, 1, 262144, 1, 2, 65536, 1, 65536, 196608, 3, 65537, 196608, 3, 65538, 196608, 1, 65535, 262144, 1, 131071, 196608, 3, 196607, 196608, 3, 131072, 65536, 3, 131074, 262144, 1, 131073, 196608, 1, 65534, 196608, 1, -131079, 196608, 1, -131078, 262144, 1, 65532, 196608, 1, 65531, 262144, 1, -7, 196608, 1, -262151, 196608, 1, -196616, 196608, 1, -65544, 196608, 1, -196615, 262144, 1, -65543, 262144, 1, -262150, 262144, 1, -65542, 65536, 1, -6, 262144, 1, -131080, 65536, 1, -196614, 65536, 1, -262152, 65536, 1, -8, 65536, 1, 65533, 262144, 1, 262143, 131072, 3, 196608, 65536, 3, 196610, 196608, 1, 196609, 131072, 3, 262142, 131072, 3, 262141, 65536, 3, 262140, 131072, 3, 262139, 131072, 3, 196606, 196608, 3, 196605, 196608, 3, 196604, 65536, 3, 196603, 65536, 3, 131067, 65536, 3, 131069, 196608, 3, 131068, 196608, 3, 131070, 196608, 3, 65528, 196608, 1, 65529, 262144, 1, 65530, 196608, 1, 131066, 65536, 3, 196602, 131072, 3, 196601, 65536, 3, 262136, 65536, 3, 262137, 131072, 3, 262138, 131072, 3, 131065, 196608, 3, 131064, 196608, 3, 196600, 196608, 3, 3, 65536, 1, 65539, 262144, 1, 196611, 262144, 1, 131075, 65536, 1, 6, 196608, 1, 7, 262144, 1, 65542, 65536, 1, 65543, 196608, 3, 131078, 196608, 1, 131079, 262144, 1, 196614, 65536, 1, 196615, 65536, 3, 262148, 196608, 1, 262149, 262144, 1, 262147, 65536, 1, 262150, 65536, 1, 65544, 131072, 3, 131080, 131072, 3, 196616, 131072, 3, 196617, 65536, 3, 131081, 65536, 3, 65545, 131072, 3, 131082, 65536, 3, 196618, 65536, 3, 65546, 196608, 3, 262151, 196608, 3, 262146, 196608, 3, 262145, 196608, 3, 327682, 131072, 3, 327683, 131072, 3, 327684, 131072, 3, 327685, 131072, 3, 327686, 65536, 3, 327687, 65536, 3, 262152, 65536, 3, 8, 196608, 1, 9, 262144, 1, 10, 65536, 1, 11, 65536, 1, 12, 196608, 1, 14, 65536, 1, 13, 262144, 1, 16, 65536, 1, 15, 65536, 1, 65547, 196608, 3, 65548, 196608, 3, 65549, 196608, 3, 131083, 196608, 3, 131084, 196608, 3, 131085, 196608, 3, 65550, 196608, 3, 65551, 196608, 3, 131086, 65536, 3, 196619, 65536, 3, 65552, 65536, 3, -327686, 65536, 1)
 
-[node name="akyra" parent="." instance=ExtResource("3_w28km")]
-position = Vector2(-410, 0)
-script = ExtResource("3_kqvq1")
+[node name="azyrel" parent="." instance=ExtResource("3_t8sy6")]
+
+[node name="akyra" parent="." instance=ExtResource("3_tr46x")]
+position = Vector2(-241, -3)
 
 [node name="Camera2D" type="Camera2D" parent="akyra"]
-position = Vector2(-7, -206)
+position = Vector2(-176, -203)
 zoom = Vector2(0.5, 0.5)
-
-[node name="azyrel" parent="." instance=ExtResource("3_t8sy6")]

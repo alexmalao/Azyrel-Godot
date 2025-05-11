@@ -5,6 +5,7 @@ class_name PlayerController
 
 var props = PlayerProps
 var move_data: PlayerMoveData
+var player_input: PlayerInput
 @onready var _sprite = $AnimatedSprite2D
 
 
@@ -15,25 +16,22 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 func _ready():
 	self.props = PlayerProps.new()
 	self.move_data = PlayerMoveData.new()
+	self.player_input = get_node("PlayerInput")
+
+	self.player_input.instant_jump_requested.connect(self.instant_jump)
+	self.player_input.jump_requested.connect(self.jump)
+	self.player_input.short_jump_requested.connect(self.short_jump)
 
 
 func _physics_process(delta):
-	# print(velocity)
 	self.update_move(delta)
 	self.update_move_data(delta)
-
-
-func _input(event: InputEvent):
-	if event.is_action_pressed("jump"):
-		self.instant_jump()
-	if event.is_action_pressed("jump"):
-		self._ground_jump(event)
 
 
 ## Perform an aerial or wall jump if possible
 func instant_jump():
 	if self._is_airborne() and self.move_data.attempt_jump():
-		var horizontal = int(Input.get_axis("move_left", "move_right"))
+		var horizontal = self.player_input.get_directional_input().x
 		
 		# perform jump, apply the maximum jump x speed
 		var x_vel = self.velocity.x
@@ -46,10 +44,20 @@ func instant_jump():
 		self.move_data.update_direction(x_vel)
 
 
+## Perform a grounded full jump.
+func jump():
+	self._ground_jump(-props.JUMP_VEL)
+
+
+## Perform a grounded full jump.
+func short_jump():
+	self._ground_jump(-props.SHORT_JUMP_VEL)
+
+
 ## Perform any grounded jump.
-func _ground_jump(event: InputEvent):
+func _ground_jump(jump_vel: float):
 	if self.is_on_floor():
-		var jump_vel = min(-props.JUMP_VEL, self.velocity.y)
+		jump_vel = min(jump_vel, self.velocity.y)
 		self.velocity = Vector2(self.velocity.x, jump_vel)
 
 
@@ -59,9 +67,7 @@ func update_move(delta: float):
 	if not self.is_on_floor():
 		self.velocity.y += gravity * delta
 	
-	var move_input = Vector2(
-		int(Input.get_axis("move_left", "move_right")),
-		int(Input.get_axis("move_up", "move_down")))
+	var move_input = self.player_input.get_directional_input()
 	
 	if self.move_data.on_left_wall:
 		pass

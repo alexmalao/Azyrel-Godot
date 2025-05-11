@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://ch0ce8h3fk51l"]
+[gd_scene load_steps=6 format=3 uid="uid://ch0ce8h3fk51l"]
 
 [ext_resource type="Script" path="res://assets/scripts/player/player_controller.gd" id="1_5x4yn"]
 [ext_resource type="Texture2D" uid="uid://c1ggsmqp14mu2" path="res://assets/sprites/characters/azyrel/azyrel_run.png" id="1_l5p6f"]
+[ext_resource type="PackedScene" uid="uid://b1cgm6ob3p05g" path="res://assets/scenes/player_input.tscn" id="3_xnjfa"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_a84gp"]
 animations = [{
@@ -30,3 +31,5 @@ autoplay = "idle"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -100)
 shape = SubResource("RectangleShape2D_gp0qq")
+
+[node name="PlayerInput" parent="." instance=ExtResource("3_xnjfa")]

@@ -1,13 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://bweevo8j74d05"]
+[gd_scene load_steps=6 format=3 uid="uid://bweevo8j74d05"]
 
-[ext_resource type="Texture2D" uid="uid://casjsb3iv188i" path="res://assets/sprites/characters/akyra/akyra_run.png" id="1_cfn25"]
-[ext_resource type="Script" path="res://assets/scripts/player/player_controller.gd" id="1_jhevo"]
+[ext_resource type="Script" path="res://assets/scripts/player/akyra/akyra_controller.gd" id="1_18g5u"]
+[ext_resource type="Texture2D" uid="uid://casjsb3iv188i" path="res://assets/sprites/characters/akyra/akyra_run.png" id="2_rwp1k"]
+[ext_resource type="PackedScene" uid="uid://b1cgm6ob3p05g" path="res://assets/scenes/player_input.tscn" id="3_2tam0"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_npl1s"]
 animations = [{
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("1_cfn25")
+"texture": ExtResource("2_rwp1k")
 }],
 "loop": true,
 "name": &"idle",
@@ -19,7 +20,7 @@ size = Vector2(100, 200)
 
 [node name="akyra" type="CharacterBody2D"]
 collision_layer = 2
-script = ExtResource("1_jhevo")
+script = ExtResource("1_18g5u")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(0, -100)
@@ -30,3 +31,5 @@ autoplay = "idle"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -100)
 shape = SubResource("RectangleShape2D_va5is")
+
+[node name="PlayerInput" parent="." instance=ExtResource("3_2tam0")]
