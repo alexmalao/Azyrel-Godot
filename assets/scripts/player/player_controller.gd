@@ -1,9 +1,14 @@
 extends CharacterBody2D
 
+class_name PlayerController
+
 
 const PlayerProps = preload("res://assets/scripts/player/player_props.gd")
+const PlayerMoveData = preload("res://assets/scripts/player/player_move_data.gd")
 
-var props = PlayerProps.new()
+var props: PlayerProps = PlayerProps.new()
+var move_data: PlayerMoveData
+@onready var _sprite = $AnimatedSprite2D
 
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
@@ -11,11 +16,12 @@ var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 
 func _ready():
-	pass
+	self.move_data = PlayerMoveData.new()
 
 
 func _physics_process(delta):
 	self.update_move(delta)
+	self.update_move_data(delta)
 
 
 ## Move the player horizontally.
@@ -30,9 +36,22 @@ func update_move(delta: float):
 	
 	if self.is_on_floor():
 		self.velocity = self._get_ground_move(delta, move_input)
-		print(self.velocity)
 
 	self.move_and_slide()
+
+
+## Update the movement data for the player
+func update_move_data(delta: float):
+	if self.is_on_floor():
+		self.move_data.update_direction(self.velocity.x)
+	self._update_state()
+
+
+## Update the character sprite
+func _update_state():
+	if self.is_on_floor():
+		_sprite.flip_h = self.move_data.facing_right
+	
 
 
 ## Get the velocity vector for grounded movement
