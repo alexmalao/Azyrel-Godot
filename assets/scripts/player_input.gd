@@ -8,7 +8,7 @@ signal jump_requested
 signal short_jump_requested
 
 
-const JUMP_HOLD_THRESHOLD = 0.1
+const JUMP_HOLD_THRESHOLD = 0.06
 var jump_hold_time = 0.0
 
 
