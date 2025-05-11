@@ -5,8 +5,8 @@ class_name PlayerController
 
 const PlayerProps = preload("res://assets/scripts/player/player_props.gd")
 const PlayerMoveData = preload("res://assets/scripts/player/player_move_data.gd")
+var props = PlayerProps
 
-var props: PlayerProps = PlayerProps.new()
 var move_data: PlayerMoveData
 @onready var _sprite = $AnimatedSprite2D
 
@@ -20,8 +20,30 @@ func _ready():
 
 
 func _physics_process(delta):
+	# print(velocity)
 	self.update_move(delta)
 	self.update_move_data(delta)
+
+
+func _input(event):
+	if event.is_action_pressed("jump"):
+		self.instant_jump()
+	if event.is_action_released("jump"):
+		self._ground_jump(event)
+
+
+## Perform an aerial or wall jump if possible
+func instant_jump():
+	if self._is_airborne() and self.move_data.attempt_jump():
+		var jump_vel = min(-props.AIR_JUMP_VEL, self.velocity.y)
+		self.velocity = Vector2(self.velocity.x, jump_vel)
+
+
+## Perform any grounded jump.
+func _ground_jump(event):
+	if self.is_on_floor():
+		var jump_vel = min(-props.JUMP_VEL, self.velocity.y)
+		self.velocity = Vector2(self.velocity.x, jump_vel)
 
 
 ## Move the player horizontally.
@@ -44,6 +66,9 @@ func update_move(delta: float):
 func update_move_data(delta: float):
 	if self.is_on_floor():
 		self.move_data.update_direction(self.velocity.x)
+		self.move_data.reset_jumps()
+		self.move_data.on_left_wall = false
+		self.move_data.on_right_wall = false
 	self._update_state()
 
 
@@ -51,11 +76,14 @@ func update_move_data(delta: float):
 func _update_state():
 	if self.is_on_floor():
 		_sprite.flip_h = self.move_data.facing_right
-	
 
 
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
+	
+	## executing jump or land, steepest grounded state is 45 degrees
+	if abs(self.velocity.y) > abs(self.velocity.x) + 1.0:
+		return self.velocity
 	
 	# note that magnitudes here have a horizontal value based on whether it is
 	# positive or negative, contrary to the naming
@@ -82,6 +110,13 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 			rel_magnitude *= pow(delta, props.TRACTION)
 			return Vector2(rel_magnitude * 1, 0)
 
+
+## Determine if the player is airborne
+func _is_airborne() -> bool:
+	return (not self.is_on_floor()
+		and not self.move_data.on_left_wall
+		and not self.move_data.on_right_wall)
+	
 
 
 

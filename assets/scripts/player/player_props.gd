@@ -14,7 +14,10 @@ const TRACTION = 0.04
 # speed at which player will default stop while grounded
 const STOP_SPEED = 100.0
 
-const JUMP_VELOCITY: float = 1750.0
+const JUMP_VEL: float = 1750.0
+const SHORT_JUMP_VEL: float = 1150.0
+
+const AIR_JUMP_VEL: float = 1750.0
 
 
 # Called when the node enters the scene tree for the first time.
