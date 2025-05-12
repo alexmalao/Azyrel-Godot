@@ -28,7 +28,7 @@ func _physics_process(delta):
 	self.update_move_data(delta)
 
 
-## Perform an aerial or wall jump if possible
+## Perform an aerial or wall jump if possible.
 func instant_jump():
 	if self._is_airborne() and self.move_data.attempt_jump():
 		var horizontal = self.player_input.get_directional_input().x
@@ -42,6 +42,9 @@ func instant_jump():
 		var jump_vel = min(-props.AIR_JUMP_VEL, self.velocity.y)
 		self.velocity = Vector2(x_vel, jump_vel)
 		self.move_data.update_direction(x_vel)
+	elif self.is_on_floor():
+		# record user input for attempting a jump in case near edge
+		self.move_data.edge_jump = true
 
 
 ## Perform a grounded full jump.
@@ -56,9 +59,10 @@ func short_jump():
 
 ## Perform any grounded jump.
 func _ground_jump(jump_vel: float):
-	if self.is_on_floor():
+	if self.is_on_floor() or self.move_data.edge_jump:
 		jump_vel = min(jump_vel, self.velocity.y)
 		self.velocity = Vector2(self.velocity.x, jump_vel)
+	self.move_data.edge_jump = false
 
 
 ## Move the player horizontally.
@@ -85,7 +89,7 @@ func update_move(delta: float):
 func update_move_data(delta: float):
 	if self.is_on_floor():
 		self.move_data.update_direction(self.velocity.x)
-		self.move_data.reset_jumps()
+		self.move_data.reset_jumps(props.JUMPS)
 		self.move_data.on_left_wall = false
 		self.move_data.on_right_wall = false
 	self._update_state()
@@ -125,7 +129,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		if absf(rel_magnitude) < props.STOP_SPEED:
 			return Vector2(0.0, 0.0)
 		else:
-			rel_magnitude *= pow(delta, props.TRACTION)
+			rel_magnitude -= rel_magnitude * props.TRACTION * delta
 			return Vector2(rel_magnitude * 1, 0)
 
 

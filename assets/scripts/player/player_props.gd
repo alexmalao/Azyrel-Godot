@@ -3,14 +3,17 @@ extends Node
 class_name PlayerProps
 
 
+# total number of airborne jumps
+@export var JUMPS: int = 1
+
 @export var GROUND_ACCEL: float = 750.0
 @export var MIN_GROUND_SPEED: float = 500.0
 @export var MAX_GROUND_SPEED: float = 1250.0
 
 # speed penalty for being faster than max ground speed
 @export var GROUND_SPEED_PENALTY: float = 250.0
-# fraction of velocity retained each second while grounded
-@export var TRACTION: float = 0.04
+# amount of times velocity drops per second while sliding on the ground
+@export var TRACTION: float = 10.0
 # speed at which player will default stop while grounded
 @export var STOP_SPEED: float = 100.0
 

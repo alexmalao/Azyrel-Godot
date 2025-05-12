@@ -8,12 +8,11 @@ signal jump_requested
 signal short_jump_requested
 
 
-const JUMP_HOLD_THRESHOLD = 0.06
+const JUMP_HOLD_THRESHOLD = 0.075
 var jump_hold_time = 0.0
 
 
 func _init():
-	print('created player input')
 	self.jump_hold_time = 0.0
 
 
