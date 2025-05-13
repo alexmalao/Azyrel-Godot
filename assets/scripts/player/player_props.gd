@@ -24,4 +24,6 @@ class_name PlayerProps
 @export var AIR_X_ACCEL: float = 1250.0
 ## minimum horizontal jump speed if a direction is held
 @export var AIR_MAX_X_SPEED: float = 750.0
+@export var AIR_DOWN_DASH_VEL: float = 1500.0
+@export var DASH_FLOAT_DUR: float = 0.25
 

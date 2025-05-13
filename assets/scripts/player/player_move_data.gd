@@ -1,5 +1,6 @@
 extends Node
 
+## Data class for storing active movement data.
 class_name PlayerMoveData
 
 
@@ -10,12 +11,32 @@ class_name PlayerMoveData
 @export var on_right_wall: bool = false
 @export var on_left_wall: bool = false
 
+# duration based values
+@export var suspend_gravity: bool = false
+@export var wall_running: bool = false
+
+
+# logic values
 @export var edge_jump: bool = false
 
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
+
+
+## Reset wall run. Call upon performing any jump or landing.
+func reset_wall_run():
+	self.has_wall_run = true
+	self.wall_running = false
+
+
+## Determine whether a wall run is possible, then disable the wall run.
+func attempt_wall_run():
+	if self.has_wall_run:
+		self.has_wall_run = false
+		return true
+	return false
 
 
 ## Reset the total amount of jumps. Call this upon landing.

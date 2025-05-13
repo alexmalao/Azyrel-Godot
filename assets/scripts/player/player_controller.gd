@@ -21,7 +21,10 @@ func _ready():
 	self.player_input.instant_jump_requested.connect(self.instant_jump)
 	self.player_input.jump_requested.connect(self.jump)
 	self.player_input.short_jump_requested.connect(self.short_jump)
+	self.player_input.dash_requested.connect(self.dash)
 
+	self.floor_constant_speed = true
+	self.floor_block_on_wall = false
 
 func _physics_process(delta):
 	self.update_move(delta)
@@ -31,6 +34,7 @@ func _physics_process(delta):
 ## Perform an aerial or wall jump if possible.
 func instant_jump():
 	if self._is_airborne() and self.move_data.attempt_jump():
+		self.move_data.suspend_gravity = false
 		var horizontal = self.player_input.get_directional_input().x
 		
 		# perform jump, apply the maximum jump x speed
@@ -47,6 +51,48 @@ func instant_jump():
 		self.move_data.edge_jump = true
 
 
+## Perform a grounded or aerial dash if possible.
+func dash():
+	var horizontal = self.player_input.get_directional_input().x
+	if horizontal == 0:
+		# record direction to be facing direction for no input
+		horizontal = 1 if self.move_data.facing_right else -1
+
+	if self.is_on_floor():
+		# ground dash
+		var new_vel
+		var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
+		## executing jump or land, revoking magnitude
+		if abs(self.velocity.y) > abs(self.velocity.x) + 1.0:
+			rel_magnitude = 0
+		
+		if horizontal > 0:
+			new_vel = max(rel_magnitude, props.MAX_GROUND_SPEED)
+		else:
+			new_vel = min(rel_magnitude, -props.MAX_GROUND_SPEED)
+		self.velocity = Vector2(new_vel * 1, 0)
+		await self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
+	elif self._is_airborne():
+		# aerial dash
+		var move_input = self.player_input.get_directional_input()
+		if move_input.y == 1 and self.velocity.y >= 0:
+			# dash downwards
+			self.move_data.suspend_gravity = false
+			var new_y_vel = max(self.velocity.y, props.AIR_DOWN_DASH_VEL)
+			self.velocity = Vector2(self.velocity.x, new_y_vel)
+			self.move_data.update_direction(self.velocity.x)
+		if move_input.y != 1 and self.move_data.attempt_jump():
+			# dash horizontally
+			var new_x_vel
+			if horizontal > 0:
+				new_x_vel = max(self.velocity.x, props.MAX_GROUND_SPEED)
+			else:
+				new_x_vel = min(self.velocity.x, -props.MAX_GROUND_SPEED)
+			self.velocity = Vector2(new_x_vel, 0.0)
+			self.move_data.update_direction(self.velocity.x)
+			await self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
+
+
 ## Perform a grounded full jump.
 func jump():
 	self._ground_jump(-props.JUMP_VEL)
@@ -57,18 +103,10 @@ func short_jump():
 	self._ground_jump(-props.SHORT_JUMP_VEL)
 
 
-## Perform any grounded jump.
-func _ground_jump(jump_vel: float):
-	if self.is_on_floor() or self.move_data.edge_jump:
-		jump_vel = min(jump_vel, self.velocity.y)
-		self.velocity = Vector2(self.velocity.x, jump_vel)
-	self.move_data.edge_jump = false
-
-
 ## Move the player horizontally.
 func update_move(delta: float):
 	# Add the gravity.
-	if not self.is_on_floor():
+	if not self.is_on_floor() and not self.move_data.suspend_gravity:
 		self.velocity.y += gravity * delta
 	
 	var move_input = self.player_input.get_directional_input()
@@ -87,11 +125,19 @@ func update_move(delta: float):
 
 ## Update the movement data for the player
 func update_move_data(delta: float):
+	var move_input = self.player_input.get_directional_input()
+	
 	if self.is_on_floor():
 		self.move_data.update_direction(self.velocity.x)
 		self.move_data.reset_jumps(props.JUMPS)
+		self.move_data.reset_wall_run()
 		self.move_data.on_left_wall = false
 		self.move_data.on_right_wall = false
+	
+	# only attach to the wall if there is a towards input
+	if self.is_on_wall():
+		pass
+
 	self._update_state()
 
 
@@ -100,11 +146,24 @@ func _update_state():
 	_sprite.flip_h = self.move_data.facing_right
 
 
+## Perform any grounded jump.
+func _ground_jump(jump_vel: float):
+	if self.is_on_floor() or self.move_data.edge_jump:
+		jump_vel = min(jump_vel, self.velocity.y)
+		self.velocity = Vector2(self.velocity.x, jump_vel)
+		self.move_data.suspend_gravity = false
+	
+	# slightly delay disabling edge jump 
+	await get_tree().process_frame
+	await get_tree().process_frame
+	self.move_data.edge_jump = false
+
+
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	
 	## executing jump or land, steepest grounded state is 45 degrees
-	if abs(self.velocity.y) > abs(self.velocity.x) + 1.0:
+	if self.move_data.edge_jump:
 		return self.velocity
 	
 	# note that magnitudes here have a horizontal value based on whether it is
@@ -158,7 +217,9 @@ func _is_airborne() -> bool:
 		and not self.move_data.on_right_wall)
 	
 
-
-
+func _suspend_dash_gravity(time: float):
+	self.move_data.suspend_gravity = true
+	await get_tree().create_timer(time).timeout
+	self.move_data.suspend_gravity = false
 
 
