@@ -24,7 +24,6 @@ func _ready():
 	self.player_input.dash_requested.connect(self.dash)
 
 	self.floor_constant_speed = true
-	self.floor_block_on_wall = false
 
 func _physics_process(delta):
 	self.update_move(delta)
@@ -46,6 +45,7 @@ func instant_jump():
 		var jump_vel = min(-props.AIR_JUMP_VEL, self.velocity.y)
 		self.velocity = Vector2(x_vel, jump_vel)
 		self.move_data.update_direction(x_vel)
+		self.move_data.reset_wall_run()
 	elif self.is_on_floor():
 		# record user input for attempting a jump in case near edge
 		self.move_data.edge_jump = true
@@ -106,14 +106,14 @@ func short_jump():
 ## Move the player horizontally.
 func update_move(delta: float):
 	# Add the gravity.
-	if not self.is_on_floor() and not self.move_data.suspend_gravity:
+	if self._is_airborne() and not self.move_data.suspend_gravity:
 		self.velocity.y += gravity * delta
 	
 	var move_input = self.player_input.get_directional_input()
 	
-	if self.move_data.on_left_wall:
+	if self.move_data.on_right_wall:
 		pass
-	elif self.move_data.on_right_wall:
+	elif self.move_data.on_left_wall:
 		pass
 	elif self.is_on_floor():
 		self.velocity = self._get_ground_move(delta, move_input)
@@ -131,12 +131,18 @@ func update_move_data(delta: float):
 		self.move_data.update_direction(self.velocity.x)
 		self.move_data.reset_jumps(props.JUMPS)
 		self.move_data.reset_wall_run()
-		self.move_data.on_left_wall = false
 		self.move_data.on_right_wall = false
+		self.move_data.on_left_wall = false
 	
 	# only attach to the wall if there is a towards input
-	if self.is_on_wall():
-		pass
+	if self._is_touching_wall(1) and move_input.x == 1:
+		self.move_data.on_right_wall = true
+	elif not self._is_touching_wall(1):
+		self.move_data.on_right_wall = false
+	if self._is_touching_wall(-1) and move_input.x == -1:
+		self.move_data.on_left_wall = true
+	elif not self._is_touching_wall(1):
+		self.move_data.on_left_wall = false
 
 	self._update_state()
 
@@ -153,7 +159,7 @@ func _ground_jump(jump_vel: float):
 		self.velocity = Vector2(self.velocity.x, jump_vel)
 		self.move_data.suspend_gravity = false
 	
-	# slightly delay disabling edge jump 
+	# delay disabling edge jump by 2 frames to allow ground jumping
 	await get_tree().process_frame
 	await get_tree().process_frame
 	self.move_data.edge_jump = false
@@ -162,7 +168,7 @@ func _ground_jump(jump_vel: float):
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	
-	## executing jump or land, steepest grounded state is 45 degrees
+	## executing jump, allow vertical momentum for a frame.
 	if self.move_data.edge_jump:
 		return self.velocity
 	
@@ -210,13 +216,29 @@ func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
 	return Vector2(new_x_vel, self.velocity.y)
 
 
-## Determine if the player is airborne
+# Determine if the player is on a wall.
+func _is_touching_wall(horizontal: int) -> bool:
+	if not self.is_on_wall():
+		return false
+	if horizontal < 0:
+		var raycast_one = get_node("LeftRaycast1")
+		var raycast_two = get_node("LeftRaycast2")
+		return raycast_one.is_colliding() or raycast_two.is_colliding()
+	elif horizontal > 0:
+		var raycast_one = get_node("RightRaycast1")
+		var raycast_two = get_node("RightRaycast2")
+		return raycast_one.is_colliding() or raycast_two.is_colliding()
+	return false
+
+
+## Determine if the player is airborne.
 func _is_airborne() -> bool:
 	return (not self.is_on_floor()
 		and not self.move_data.on_left_wall
 		and not self.move_data.on_right_wall)
 	
 
+## Suspend gravity for a set amount of time.
 func _suspend_dash_gravity(time: float):
 	self.move_data.suspend_gravity = true
 	await get_tree().create_timer(time).timeout

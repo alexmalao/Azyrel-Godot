@@ -14,7 +14,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_c2p0p"]
-size = Vector2(100, 200)
+size = Vector2(300, 200)
 
 [node name="akyra_npc" type="CharacterBody2D"]
 collision_layer = 0
