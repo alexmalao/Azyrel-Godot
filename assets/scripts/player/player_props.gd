@@ -27,3 +27,12 @@ class_name PlayerProps
 @export var AIR_DOWN_DASH_VEL: float = 1500.0
 @export var DASH_FLOAT_DUR: float = 0.25
 
+@export var RIGHT_WALL_JUMP_VECTOR = Vector2(-1, -1.8).normalized()
+@export var LEFT_WALL_JUMP_VECTOR = Vector2(1, -1.8).normalized()
+@export var WALL_RUN_SPEED: float = 850.0
+@export var WALL_JUMP_SPEED: float = 1750.0
+@export var WALL_SLIDE_ACCEL: float = 1500.0
+@export var WALL_SLIDE_MAX_SPEED: float = 750.0
+
+@export var WALL_RUN_DUR: float = 0.20
+

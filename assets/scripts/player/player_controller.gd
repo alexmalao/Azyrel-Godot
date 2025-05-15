@@ -26,13 +26,26 @@ func _ready():
 	self.floor_constant_speed = true
 
 func _physics_process(delta):
-	self.update_move(delta)
 	self.update_move_data(delta)
+	self.update_move(delta)
+	self._update_state()
 
 
 ## Perform an aerial or wall jump if possible.
 func instant_jump():
-	if self._is_airborne() and self.move_data.attempt_jump():
+	if self.move_data.on_right_wall and not self.is_on_floor():
+		self.velocity = props.RIGHT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
+		self.move_data.on_right_wall = false
+		self.move_data.facing_right = false
+		self.move_data.reset_wall_run()
+		self._wall_vault()
+	elif self.move_data.on_left_wall and not self.is_on_floor():
+		self.velocity = props.LEFT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
+		self.move_data.on_left_wall = false
+		self.move_data.facing_right = true
+		self.move_data.reset_wall_run()
+		self._wall_vault()
+	elif self._is_airborne() and self.move_data.attempt_jump():
 		self.move_data.suspend_gravity = false
 		var horizontal = self.player_input.get_directional_input().x
 		
@@ -57,8 +70,24 @@ func dash():
 	if horizontal == 0:
 		# record direction to be facing direction for no input
 		horizontal = 1 if self.move_data.facing_right else -1
-
-	if self.is_on_floor():
+	
+	if self.move_data.on_right_wall and not self.is_on_floor():
+		# dash off right wall
+		self.velocity = Vector2(-props.MAX_GROUND_SPEED, 0)
+		self.move_data.on_right_wall = false
+		self.move_data.facing_right = false
+		self.move_data.reset_wall_run()
+		self._wall_vault()
+		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
+	elif self.move_data.on_left_wall and not self.is_on_floor():
+		# dash off left wall
+		self.velocity = Vector2(props.MAX_GROUND_SPEED, 0)
+		self.move_data.on_left_wall = false
+		self.move_data.facing_right = true
+		self.move_data.reset_wall_run()
+		self._wall_vault()
+		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
+	elif self.is_on_floor():
 		# ground dash
 		var new_vel
 		var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
@@ -71,7 +100,7 @@ func dash():
 		else:
 			new_vel = min(rel_magnitude, -props.MAX_GROUND_SPEED)
 		self.velocity = Vector2(new_vel * 1, 0)
-		await self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
+		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
 	elif self._is_airborne():
 		# aerial dash
 		var move_input = self.player_input.get_directional_input()
@@ -90,7 +119,7 @@ func dash():
 				new_x_vel = min(self.velocity.x, -props.MAX_GROUND_SPEED)
 			self.velocity = Vector2(new_x_vel, 0.0)
 			self.move_data.update_direction(self.velocity.x)
-			await self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
+			self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
 
 
 ## Perform a grounded full jump.
@@ -112,9 +141,9 @@ func update_move(delta: float):
 	var move_input = self.player_input.get_directional_input()
 	
 	if self.move_data.on_right_wall:
-		pass
+		self.velocity = self._get_wall_move(delta, move_input, 1)
 	elif self.move_data.on_left_wall:
-		pass
+		self.velocity = self._get_wall_move(delta, move_input, -1)
 	elif self.is_on_floor():
 		self.velocity = self._get_ground_move(delta, move_input)
 	else:
@@ -135,16 +164,16 @@ func update_move_data(delta: float):
 		self.move_data.on_left_wall = false
 	
 	# only attach to the wall if there is a towards input
-	if self._is_touching_wall(1) and move_input.x == 1:
+	if self._is_touching_wall(1) and move_input.x == 1 and not self.move_data.wall_vaulted:
 		self.move_data.on_right_wall = true
+		self.move_data.facing_right = true
 	elif not self._is_touching_wall(1):
 		self.move_data.on_right_wall = false
-	if self._is_touching_wall(-1) and move_input.x == -1:
+	if self._is_touching_wall(-1) and move_input.x == -1 and not self.move_data.wall_vaulted:
 		self.move_data.on_left_wall = true
-	elif not self._is_touching_wall(1):
+		self.move_data.facing_right = false
+	elif not self._is_touching_wall(-1):
 		self.move_data.on_left_wall = false
-
-	self._update_state()
 
 
 ## Update the character sprite
@@ -164,6 +193,29 @@ func _ground_jump(jump_vel: float):
 	await get_tree().process_frame
 	self.move_data.edge_jump = false
 
+
+## Get the velocity vector of the player for wall movement.
+func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int):
+	
+	if move_input.x == -wall_dir:
+		# no longer touching the wall
+		self.move_data.on_left_wall = false
+		self.move_data.on_right_wall = false
+		self.move_data.wall_running = false
+		return self.velocity
+	if move_input.y == -1 and self.move_data.attempt_wall_run():
+		self._wall_run(props.WALL_RUN_DUR)
+
+	var new_y_vel = self.velocity.y
+	if new_y_vel > props.WALL_SLIDE_MAX_SPEED:
+		new_y_vel = min(props.WALL_SLIDE_MAX_SPEED, new_y_vel - props.WALL_SLIDE_ACCEL * delta)
+	elif new_y_vel < props.WALL_SLIDE_MAX_SPEED:
+		new_y_vel = max(-props.WALL_SLIDE_MAX_SPEED, new_y_vel + props.WALL_SLIDE_ACCEL * delta)
+	
+	if self.move_data.wall_running:
+		return Vector2(0, min(new_y_vel, -props.WALL_RUN_SPEED))
+
+	return Vector2(0, new_y_vel)
 
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
@@ -218,8 +270,6 @@ func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
 
 # Determine if the player is on a wall.
 func _is_touching_wall(horizontal: int) -> bool:
-	if not self.is_on_wall():
-		return false
 	if horizontal < 0:
 		var raycast_one = get_node("LeftRaycast1")
 		var raycast_two = get_node("LeftRaycast2")
@@ -244,4 +294,17 @@ func _suspend_dash_gravity(time: float):
 	await get_tree().create_timer(time).timeout
 	self.move_data.suspend_gravity = false
 
+
+## Suspend gravity for a set amount of time.
+func _wall_run(time: float):
+	self.move_data.wall_running = true
+	await get_tree().create_timer(time).timeout
+	self.move_data.wall_running = false
+
+
+## toggle wall_vaulted for a frame to prevent sticking to wall
+func _wall_vault():
+	self.move_data.wall_vaulted = true
+	await get_tree().process_frame
+	self.move_data.wall_vaulted = false
 

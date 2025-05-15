@@ -35,3 +35,17 @@ position = Vector2(0, -100)
 shape = SubResource("RectangleShape2D_va5is")
 
 [node name="PlayerInput" parent="." instance=ExtResource("3_2tam0")]
+
+[node name="RightRaycast1" type="RayCast2D" parent="."]
+target_position = Vector2(60, 0)
+
+[node name="RightRaycast2" type="RayCast2D" parent="."]
+position = Vector2(0, -200)
+target_position = Vector2(60, 0)
+
+[node name="LeftRaycast1" type="RayCast2D" parent="."]
+target_position = Vector2(-60, 0)
+
+[node name="LeftRaycast2" type="RayCast2D" parent="."]
+position = Vector2(0, -200)
+target_position = Vector2(-60, 0)

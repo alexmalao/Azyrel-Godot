@@ -14,6 +14,7 @@ class_name PlayerMoveData
 # duration based values
 @export var suspend_gravity: bool = false
 @export var wall_running: bool = false
+@export var wall_vaulted: bool = false
 
 
 # logic values
