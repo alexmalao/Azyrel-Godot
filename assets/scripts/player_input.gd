@@ -32,10 +32,6 @@ func _input(event: InputEvent):
 		if event.is_action_pressed(input):
 			input_signal.emit()
 
-	# if event.is_action_pressed("jump"):
-	# 	self.instant_jump_requested.emit()
-	
-
 
 func _physics_process(delta):
 	if Input.is_action_pressed("jump"):
@@ -43,7 +39,6 @@ func _physics_process(delta):
 		if self.jump_hold_time > JUMP_HOLD_THRESHOLD:
 			self.jump_requested.emit()
 			self.jump_hold_time = 0
-
 
 
 func get_directional_input():
