@@ -19,4 +19,3 @@ func _init():
 	AIR_JUMP_VEL = 1700.0
 	AIR_X_ACCEL = 1225.0
 	AIR_MAX_X_SPEED = 725.0
-

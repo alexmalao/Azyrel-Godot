@@ -1,0 +1,10 @@
+join akyra right [animation="Instant In" length="0.0"]
+akyra: Hey, you, Azyrel! Well... at least I'm pretty sure that's your name.
+akyra: I'm guessing you are a bit confused how I know who you are even though you have never met me right?
+leave --All-- [animation="Instant Out" length="0.0"]
+join azyrel left [animation="Instant In" length="0.0"]
+azyrel: I mean, not really?
+leave --All--
+join akyra right
+akyra: Well you are dreaming right now.
+akyra: I'm gonna guide you through the tutorial, so let's make sure you are better than a game journalist before you wake up.

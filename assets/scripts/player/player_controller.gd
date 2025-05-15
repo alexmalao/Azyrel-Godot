@@ -6,6 +6,7 @@ class_name PlayerController
 var props = PlayerProps
 var move_data: PlayerMoveData
 var player_input: PlayerInput
+var interact_box: Area2D
 @onready var _sprite = $AnimatedSprite2D
 
 
@@ -17,11 +18,13 @@ func _ready():
 	self.props = PlayerProps.new()
 	self.move_data = PlayerMoveData.new()
 	self.player_input = get_node("PlayerInput")
+	self.interact_box = get_node("InteractBox")
 
 	self.player_input.instant_jump_requested.connect(self.instant_jump)
 	self.player_input.jump_requested.connect(self.jump)
 	self.player_input.short_jump_requested.connect(self.short_jump)
 	self.player_input.dash_requested.connect(self.dash)
+	self.player_input.interact_requested.connect(self.interact)
 
 	self.floor_constant_speed = true
 
@@ -31,21 +34,31 @@ func _physics_process(delta):
 	self._update_state()
 
 
+## Interact with area.
+func interact():
+	var areas = self.interact_box.get_overlapping_areas()
+	if areas.size() > 0:
+		areas[0].get_parent().interact()
+
+
 ## Perform an aerial or wall jump if possible.
 func instant_jump():
 	if self.move_data.on_right_wall and not self.is_on_floor():
+		print('wall jump')
 		self.velocity = props.RIGHT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_right_wall = false
 		self.move_data.facing_right = false
 		self.move_data.reset_wall_run()
 		self._wall_vault()
 	elif self.move_data.on_left_wall and not self.is_on_floor():
+		print('wall jump')
 		self.velocity = props.LEFT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_left_wall = false
 		self.move_data.facing_right = true
 		self.move_data.reset_wall_run()
 		self._wall_vault()
 	elif self._is_airborne() and self.move_data.attempt_jump():
+		print('air jump')
 		self.move_data.suspend_gravity = false
 		var horizontal = self.player_input.get_directional_input().x
 		
@@ -354,4 +367,3 @@ func _wall_vault():
 func _ceiling_hang(time: float):
 	await get_tree().create_timer(time).timeout
 	self.move_data.on_ceiling = false
-

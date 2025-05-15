@@ -49,7 +49,6 @@ func reset_jumps(total_jumps: int):
 ## Determine whether a jump is possible, then decrement the available jumps.
 func attempt_jump():
 	if self.cur_jumps > 0:
-		print('jump attempted')
 		self.cur_jumps -= 1
 		return true
 	return false

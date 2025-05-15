@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://ch0ce8h3fk51l"]
+[gd_scene load_steps=6 format=3 uid="uid://ch0ce8h3fk51l"]
 
 [ext_resource type="Script" uid="uid://c5crxa1c08j6d" path="res://assets/scripts/player/player_controller.gd" id="1_5x4yn"]
 [ext_resource type="Texture2D" uid="uid://c1ggsmqp14mu2" path="res://assets/sprites/characters/azyrel/azyrel_run.png" id="1_l5p6f"]
@@ -17,9 +17,6 @@ animations = [{
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gp0qq"]
 size = Vector2(100, 200)
-
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_qt236"]
-size = Vector2(50, 50)
 
 [node name="azyrel" type="CharacterBody2D"]
 collision_layer = 2
@@ -62,11 +59,8 @@ target_position = Vector2(0, -60)
 position = Vector2(50, -150)
 target_position = Vector2(0, -60)
 
-[node name="InteractBox" type="Area2D" parent="."]
+[node name="Hurtbox" type="Area2D" parent="."]
 collision_layer = 2
 collision_mask = 4
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractBox"]
-position = Vector2(0, -100)
-shape = SubResource("RectangleShape2D_qt236")
-debug_color = Color(0.294419, 0.629214, 1.34766e-06, 0.42)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox"]

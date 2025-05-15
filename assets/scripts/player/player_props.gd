@@ -38,4 +38,3 @@ class_name PlayerProps
 
 @export var CEILING_TRACTION: float = 2.0
 @export var CEILING_HANG_DUR: float = 0.6
-

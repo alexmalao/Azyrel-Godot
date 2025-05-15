@@ -13,17 +13,20 @@ animations = [{
 "speed": 5.0
 }]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_c2p0p"]
-size = Vector2(300, 200)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_k7hja"]
+size = Vector2(400, 200)
 
-[node name="akyra_npc" type="CharacterBody2D"]
-collision_layer = 0
-collision_mask = 0
+[node name="akyra_npc" type="Node2D"]
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_thv28")
 offset = Vector2(0, -100)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 position = Vector2(0, -100)
-shape = SubResource("RectangleShape2D_c2p0p")
+shape = SubResource("RectangleShape2D_k7hja")
+debug_color = Color(0.31134, 0.850687, 1.54018e-06, 0.42)
