@@ -26,8 +26,8 @@ func _ready():
 	self.floor_constant_speed = true
 
 func _physics_process(delta):
-	self.update_move_data(delta)
 	self.update_move(delta)
+	self.update_move_data(delta)
 	self._update_state()
 
 
@@ -140,7 +140,9 @@ func update_move(delta: float):
 	
 	var move_input = self.player_input.get_directional_input()
 	
-	if self.move_data.on_right_wall:
+	if self.move_data.on_ceiling:
+		self.velocity = self._get_ceiling_move(delta, move_input)
+	elif self.move_data.on_right_wall:
 		self.velocity = self._get_wall_move(delta, move_input, 1)
 	elif self.move_data.on_left_wall:
 		self.velocity = self._get_wall_move(delta, move_input, -1)
@@ -163,6 +165,13 @@ func update_move_data(delta: float):
 		self.move_data.on_right_wall = false
 		self.move_data.on_left_wall = false
 	
+	self.move_data.last_frame_airborne = self._is_airborne()
+	if self._is_touching_ceiling() and move_input.y == -1:
+		if not self.move_data.on_ceiling:
+			self.move_data.last_frame_airborne = true
+		self.move_data.on_ceiling = true
+	else:
+		self.move_data.on_ceiling = false
 	# only attach to the wall if there is a towards input
 	if self._is_touching_wall(1) and move_input.x == 1 and not self.move_data.wall_vaulted:
 		self.move_data.on_right_wall = true
@@ -174,6 +183,8 @@ func update_move_data(delta: float):
 		self.move_data.facing_right = false
 	elif not self._is_touching_wall(-1):
 		self.move_data.on_left_wall = false
+	if not self._is_touching_wall(1) and not self._is_touching_wall(-1):
+		self.move_data.wall_running = false
 
 
 ## Update the character sprite
@@ -194,8 +205,31 @@ func _ground_jump(jump_vel: float):
 	self.move_data.edge_jump = false
 
 
+## Get the velocity vector of the player for ceiling movement
+func _get_ceiling_move(delta: float, move_input: Vector2) -> Vector2:
+
+	# note that magnitudes here have a horizontal value based on whether it is
+	# positive or negative, contrary to the naming
+	var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
+
+	if (self.move_data.last_frame_airborne and move_input.x != 0
+		and ((move_input.x == 1 and rel_magnitude >= -0.1)
+		or (move_input.x == -1 and rel_magnitude <= 0.1))):
+		
+		rel_magnitude = max(abs(rel_magnitude), props.MAX_GROUND_SPEED) * move_input.x
+		return Vector2(rel_magnitude, 0)
+
+	# stop the character
+	if absf(rel_magnitude) < props.STOP_SPEED:
+		self._ceiling_hang(props.CEILING_HANG_DUR)
+		return Vector2(0, 0)
+	else:
+		rel_magnitude -= rel_magnitude * props.CEILING_TRACTION * delta
+		return Vector2(rel_magnitude, 0)
+
+
 ## Get the velocity vector of the player for wall movement.
-func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int):
+func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int) -> Vector2:
 	
 	if move_input.x == -wall_dir:
 		# no longer touching the wall
@@ -221,7 +255,7 @@ func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int):
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	
 	## executing jump, allow vertical momentum for a frame.
-	if self.move_data.edge_jump:
+	if abs(self.velocity.y) > abs(self.velocity.x) or self.move_data.edge_jump:
 		return self.velocity
 	
 	# note that magnitudes here have a horizontal value based on whether it is
@@ -268,7 +302,7 @@ func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
 	return Vector2(new_x_vel, self.velocity.y)
 
 
-# Determine if the player is on a wall.
+##  Determine if the player is on a wall.
 func _is_touching_wall(horizontal: int) -> bool:
 	if horizontal < 0:
 		var raycast_one = get_node("LeftRaycast1")
@@ -280,12 +314,19 @@ func _is_touching_wall(horizontal: int) -> bool:
 		return raycast_one.is_colliding() or raycast_two.is_colliding()
 	return false
 
+## Determine if the player is on the ceiling.
+func _is_touching_ceiling() -> bool:
+	var raycast_one = get_node('UpRaycast1')
+	var raycast_two = get_node('UpRaycast2')
+	return raycast_one.is_colliding() or raycast_two.is_colliding()
+
 
 ## Determine if the player is airborne.
 func _is_airborne() -> bool:
 	return (not self.is_on_floor()
 		and not self.move_data.on_left_wall
-		and not self.move_data.on_right_wall)
+		and not self.move_data.on_right_wall
+		and not self.move_data.on_ceiling)
 	
 
 ## Suspend gravity for a set amount of time.
@@ -302,9 +343,15 @@ func _wall_run(time: float):
 	self.move_data.wall_running = false
 
 
-## toggle wall_vaulted for a frame to prevent sticking to wall
+## Toggle wall_vaulted for a frame to prevent sticking to wall
 func _wall_vault():
 	self.move_data.wall_vaulted = true
 	await get_tree().process_frame
 	self.move_data.wall_vaulted = false
+
+
+## Forcibly disable ceiling hang after the set duration
+func _ceiling_hang(time: float):
+	await get_tree().create_timer(time).timeout
+	self.move_data.on_ceiling = false
 

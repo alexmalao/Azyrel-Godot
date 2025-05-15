@@ -10,15 +10,16 @@ class_name PlayerMoveData
 @export var facing_right: bool = false
 @export var on_right_wall: bool = false
 @export var on_left_wall: bool = false
+@export var on_ceiling: bool = false
 
 # duration based values
 @export var suspend_gravity: bool = false
 @export var wall_running: bool = false
 @export var wall_vaulted: bool = false
 
-
 # logic values
 @export var edge_jump: bool = false
+@export var last_frame_airborne: bool = false
 
 
 # Called when the node enters the scene tree for the first time.
@@ -48,6 +49,7 @@ func reset_jumps(total_jumps: int):
 ## Determine whether a jump is possible, then decrement the available jumps.
 func attempt_jump():
 	if self.cur_jumps > 0:
+		print('jump attempted')
 		self.cur_jumps -= 1
 		return true
 	return false

@@ -15,8 +15,9 @@ var input_signal_dict = {
 }
 
 
-const JUMP_HOLD_THRESHOLD = 0.075
+const JUMP_HOLD_THRESHOLD = 0.08
 var jump_hold_time = 0.0
+var jump_held = false
 
 
 func _init():
@@ -26,6 +27,11 @@ func _init():
 func _input(event: InputEvent):
 	if event.is_action_released("jump"):
 		self.short_jump_requested.emit()
+		self.jump_hold_time = 0
+		self.jump_held = false
+	
+	if event.is_action_pressed("jump"):
+		self.jump_held = true
 	
 	for input in self.input_signal_dict:
 		var input_signal = self.input_signal_dict[input]
@@ -34,11 +40,12 @@ func _input(event: InputEvent):
 
 
 func _physics_process(delta):
-	if Input.is_action_pressed("jump"):
+	if Input.is_action_pressed("jump") and self.jump_held:
 		self.jump_hold_time += delta
 		if self.jump_hold_time > JUMP_HOLD_THRESHOLD:
 			self.jump_requested.emit()
 			self.jump_hold_time = 0
+			self.jump_held = false
 
 
 func get_directional_input():
