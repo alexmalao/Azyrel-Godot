@@ -11,7 +11,7 @@ var interact_box: Area2D
 
 
 # Get the gravity from the project settings to be synced with RigidBody nodes.
-var gravity = ProjectSettings.get_setting("physics/2d/default_gravity")
+var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 
 func _ready():
@@ -26,6 +26,8 @@ func _ready():
 	self.player_input.dash_requested.connect(self.dash)
 	self.player_input.interact_requested.connect(self.interact)
 
+	self.floor_stop_on_slope = false
+
 func _physics_process(delta):
 	self.update_move(delta)
 	self.update_move_data(delta)
@@ -34,7 +36,7 @@ func _physics_process(delta):
 
 ## Interact with area.
 func interact():
-	var areas = self.interact_box.get_overlapping_areas()
+	var areas: Array = self.interact_box.get_overlapping_areas()
 	if areas.size() > 0:
 		areas[0].get_parent().interact()
 
@@ -74,7 +76,7 @@ func instant_jump():
 
 ## Perform a grounded or aerial dash if possible.
 func dash():
-	var horizontal = self.player_input.get_directional_input().x
+	var horizontal: int = self.player_input.get_directional_input().x
 	if horizontal == 0:
 		# record direction to be facing direction for no input
 		horizontal = 1 if self.move_data.facing_right else -1
@@ -146,7 +148,7 @@ func update_move(delta: float):
 	if self._is_airborne() and not self.move_data.suspend_gravity:
 		self.velocity.y += gravity * delta
 	
-	var move_input = self.player_input.get_directional_input()
+	var move_input: Vector2 = self.player_input.get_directional_input()
 	
 	if self.move_data.on_ceiling:
 		self.velocity = self._get_ceiling_move(delta, move_input)
@@ -184,12 +186,12 @@ func update_move_data(delta: float) -> void:
 	if self._is_touching_wall(1) and move_input.x == 1 and not self.move_data.wall_vaulted:
 		self.move_data.on_right_wall = true
 		self.move_data.facing_right = true
-	elif not self._is_touching_wall(1):
+	elif not self._is_touching_wall(1) or move_input.y == 1:
 		self.move_data.on_right_wall = false
 	if self._is_touching_wall(-1) and move_input.x == -1 and not self.move_data.wall_vaulted:
 		self.move_data.on_left_wall = true
 		self.move_data.facing_right = false
-	elif not self._is_touching_wall(-1):
+	elif not self._is_touching_wall(-1) or move_input.y == 1:
 		self.move_data.on_left_wall = false
 	if not self._is_touching_wall(1) and not self._is_touching_wall(-1):
 		self.move_data.wall_running = false
@@ -218,7 +220,7 @@ func _get_ceiling_move(delta: float, move_input: Vector2) -> Vector2:
 
 	# note that magnitudes here have a horizontal value based on whether it is
 	# positive or negative, contrary to the naming
-	var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
+	var rel_magnitude: float = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
 
 	if (self.move_data.last_frame_airborne and move_input.x != 0
 		and ((move_input.x == 1 and rel_magnitude >= -0.1)
@@ -295,10 +297,10 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 
 ## Get the velocity vector for airborne movement.
 func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
-	var new_x_vel
+	var new_x_vel: float
 	
 	# airborne movement does not apply traction or slowdown
-	var mod_speed = self.velocity.x + move_input.x * props.AIR_X_ACCEL * delta
+	var mod_speed: float = self.velocity.x + move_input.x * props.AIR_X_ACCEL * delta
 	if mod_speed > props.AIR_MAX_X_SPEED:
 		new_x_vel = min(mod_speed, self.velocity.x)  # only allow slowing down
 		new_x_vel = max(new_x_vel, props.AIR_MAX_X_SPEED)  # can't accelerate past max air speed
@@ -313,20 +315,21 @@ func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
 
 ##  Determine if the player is on a wall.
 func _is_touching_wall(horizontal: int) -> bool:
+	return false
 	if horizontal < 0:
 		var raycast_one: RayCast2D = get_node("LeftRaycast1")
 		var raycast_two: RayCast2D = get_node("LeftRaycast2")
 		return raycast_one.is_colliding() or raycast_two.is_colliding()
 	elif horizontal > 0:
-		var raycast_one = get_node("RightRaycast1")
-		var raycast_two = get_node("RightRaycast2")
+		var raycast_one: RayCast2D = get_node("RightRaycast1")
+		var raycast_two: RayCast2D = get_node("RightRaycast2")
 		return raycast_one.is_colliding() or raycast_two.is_colliding()
 	return false
 
 ## Determine if the player is on the ceiling.
 func _is_touching_ceiling() -> bool:
-	var raycast_one = get_node('UpRaycast1')
-	var raycast_two = get_node('UpRaycast2')
+	var raycast_one: RayCast2D = get_node('UpRaycast1')
+	var raycast_two: RayCast2D = get_node('UpRaycast2')
 	return raycast_one.is_colliding() or raycast_two.is_colliding()
 
 
