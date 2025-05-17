@@ -1,9 +1,8 @@
-[gd_scene load_steps=7 format=4 uid="uid://bg3mk4eh2dt12"]
+[gd_scene load_steps=6 format=4 uid="uid://bg3mk4eh2dt12"]
 
 [ext_resource type="Texture2D" uid="uid://ckbx7gwydao5e" path="res://assets/sprites/tilemap/dev_tilemap.png" id="1_r8u3c"]
 [ext_resource type="PackedScene" uid="uid://ch0ce8h3fk51l" path="res://assets/scenes/characters/azyrel.tscn" id="2_pd15t"]
 [ext_resource type="PackedScene" uid="uid://dolbhfbsgwai1" path="res://assets/scenes/npcs/akyra_npc.tscn" id="3_koxrg"]
-[ext_resource type="Script" uid="uid://c7ynct63j8fsn" path="res://assets/scripts/player/npc_interact.gd" id="4_spne4"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_tacab"]
 texture = ExtResource("1_r8u3c")
@@ -53,4 +52,3 @@ position_smoothing_speed = 10.0
 
 [node name="akyra_npc" parent="." instance=ExtResource("3_koxrg")]
 position = Vector2(1900, 0)
-script = ExtResource("4_spne4")

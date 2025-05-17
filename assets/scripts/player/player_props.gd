@@ -34,7 +34,7 @@ class_name PlayerProps
 @export var WALL_SLIDE_ACCEL: float = 1500.0
 @export var WALL_SLIDE_MAX_SPEED: float = 750.0
 
-@export var WALL_RUN_DUR: float = 0.20
+@export var WALL_RUN_DUR: float = 0.15
 
 @export var CEILING_TRACTION: float = 2.0
 @export var CEILING_HANG_DUR: float = 0.6

@@ -61,6 +61,14 @@ target_position = Vector2(0, -60)
 position = Vector2(50, -150)
 target_position = Vector2(0, -60)
 
+[node name="DownRaycast1" type="RayCast2D" parent="."]
+position = Vector2(-50, -50)
+target_position = Vector2(0, 60)
+
+[node name="DownRaycast2" type="RayCast2D" parent="."]
+position = Vector2(50, -50)
+target_position = Vector2(0, 60)
+
 [node name="InteractBox" type="Area2D" parent="."]
 collision_layer = 2
 collision_mask = 4

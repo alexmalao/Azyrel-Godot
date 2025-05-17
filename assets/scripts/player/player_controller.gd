@@ -43,13 +43,13 @@ func interact():
 
 ## Perform an aerial or wall jump if possible.
 func instant_jump():
-	if self.move_data.on_right_wall and not self.is_on_floor():
+	if self.move_data.on_right_wall and not self._is_grounded():
 		self.velocity = props.RIGHT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_right_wall = false
 		self.move_data.facing_right = false
 		self.move_data.reset_wall_run()
 		self._wall_vault()
-	elif self.move_data.on_left_wall and not self.is_on_floor():
+	elif self.move_data.on_left_wall and not self._is_grounded():
 		self.velocity = props.LEFT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_left_wall = false
 		self.move_data.facing_right = true
@@ -69,7 +69,7 @@ func instant_jump():
 		self.velocity = Vector2(x_vel, jump_vel)
 		self.move_data.update_direction(x_vel)
 		self.move_data.reset_wall_run()
-	elif self.is_on_floor():
+	elif self._is_grounded():
 		# record user input for attempting a jump in case near edge
 		self.move_data.edge_jump = true
 
@@ -81,7 +81,7 @@ func dash():
 		# record direction to be facing direction for no input
 		horizontal = 1 if self.move_data.facing_right else -1
 	
-	if self.move_data.on_right_wall and not self.is_on_floor():
+	if self.move_data.on_right_wall and not self._is_grounded():
 		# dash off right wall
 		self.velocity = Vector2(-props.MAX_GROUND_SPEED, 0)
 		self.move_data.on_right_wall = false
@@ -89,7 +89,7 @@ func dash():
 		self.move_data.reset_wall_run()
 		self._wall_vault()
 		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
-	elif self.move_data.on_left_wall and not self.is_on_floor():
+	elif self.move_data.on_left_wall and not self._is_grounded():
 		# dash off left wall
 		self.velocity = Vector2(props.MAX_GROUND_SPEED, 0)
 		self.move_data.on_left_wall = false
@@ -97,7 +97,7 @@ func dash():
 		self.move_data.reset_wall_run()
 		self._wall_vault()
 		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
-	elif self.is_on_floor():
+	elif self._is_grounded():
 		# ground dash
 		var new_vel
 		var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
@@ -156,7 +156,7 @@ func update_move(delta: float):
 		self.velocity = self._get_wall_move(delta, move_input, 1)
 	elif self.move_data.on_left_wall:
 		self.velocity = self._get_wall_move(delta, move_input, -1)
-	elif self.is_on_floor():
+	elif self._is_grounded():
 		self.velocity = self._get_ground_move(delta, move_input)
 	else:
 		self.velocity = self._get_airborne_move(delta, move_input)
@@ -168,7 +168,7 @@ func update_move(delta: float):
 func update_move_data(delta: float) -> void:
 	var move_input = self.player_input.get_directional_input()
 	
-	if self.is_on_floor():
+	if self._is_grounded():
 		self.move_data.update_direction(self.velocity.x)
 		self.move_data.reset_jumps(props.JUMPS)
 		self.move_data.reset_wall_run()
@@ -204,7 +204,7 @@ func _update_state() -> void:
 
 ## Perform any grounded jump.
 func _ground_jump(jump_vel: float) -> void:
-	if self.is_on_floor() or self.move_data.edge_jump:
+	if self._is_grounded() or self.move_data.edge_jump:
 		jump_vel = min(jump_vel, self.velocity.y)
 		self.velocity = Vector2(self.velocity.x, jump_vel)
 		self.move_data.suspend_gravity = false
@@ -264,6 +264,10 @@ func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int) -> Vector2
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	
+	if self.move_data.last_frame_airborne:
+		print('landing')
+		return self.velocity * self._get_floor_slope()
+
 	## executing jump, allow vertical momentum for a frame.
 	if abs(self.velocity.y) > abs(self.velocity.x) or self.move_data.edge_jump:
 		return self.velocity
@@ -315,16 +319,26 @@ func _get_airborne_move(delta: float, move_input: Vector2) -> Vector2:
 
 ##  Determine if the player is on a wall.
 func _is_touching_wall(horizontal: int) -> bool:
-	return false
+	var touching: bool = false
 	if horizontal < 0:
 		var raycast_one: RayCast2D = get_node("LeftRaycast1")
 		var raycast_two: RayCast2D = get_node("LeftRaycast2")
-		return raycast_one.is_colliding() or raycast_two.is_colliding()
+		if raycast_one.is_colliding():
+			var angle: float = raycast_one.get_collision_normal().angle()
+			touching = touching or (PI / 4 - 0.1 > angle and angle > -PI / 4 + 0.1)
+		if raycast_two.is_colliding():
+			var angle: float = raycast_one.get_collision_normal().angle()
+			touching = touching or (PI / 4 - 0.1 > angle and angle > -PI / 4 + 0.1)
 	elif horizontal > 0:
 		var raycast_one: RayCast2D = get_node("RightRaycast1")
 		var raycast_two: RayCast2D = get_node("RightRaycast2")
-		return raycast_one.is_colliding() or raycast_two.is_colliding()
-	return false
+		if raycast_one.is_colliding():
+			var angle: float = raycast_one.get_collision_normal().angle()
+			touching = touching or (3 * PI / 4 + 0.1 < angle or angle < -3 * PI / 4 - 0.1)
+		if raycast_two.is_colliding():
+			var angle: float = raycast_one.get_collision_normal().angle()
+			touching = touching or (3 * PI / 4 + 0.1 < angle or angle < -3 * PI / 4 - 0.1)
+	return touching
 
 ## Determine if the player is on the ceiling.
 func _is_touching_ceiling() -> bool:
@@ -335,10 +349,42 @@ func _is_touching_ceiling() -> bool:
 
 ## Determine if the player is airborne.
 func _is_airborne() -> bool:
-	return (not self.is_on_floor()
+	return (not self._is_grounded()
 		and not self.move_data.on_left_wall
 		and not self.move_data.on_right_wall
 		and not self.move_data.on_ceiling)
+
+
+## Determine if the player is grounded.
+func _is_grounded() -> bool:
+	var touching: bool = false
+	var raycast_one: RayCast2D = get_node("DownRaycast1")
+	var raycast_two: RayCast2D = get_node("DownRaycast2")
+	if raycast_one.is_colliding():
+		var angle: float = raycast_one.get_collision_normal().angle()
+		print(angle)
+		touching = touching or (-PI / 4 + 0.1 > angle and angle > -3 * PI / 4 - 0.1)
+	if raycast_two.is_colliding():
+		var angle: float = raycast_one.get_collision_normal().angle()
+		print(angle)
+		touching = touching or (-PI / 4 + 0.1 > angle and angle > -3 * PI / 4 - 0.1)
+	return touching
+
+
+## Get the floor slope angle.
+func _get_floor_slope() -> Vector2:
+	
+	var raycast_one: RayCast2D = get_node("DownRaycast1")
+	var raycast_two: RayCast2D = get_node("DownRaycast2")
+	if raycast_one.is_colliding():
+		var slope: Vector2 = raycast_one.get_collision_normal().orthogonal()
+		return slope if slope.x > 0 else -slope
+	if raycast_two.is_colliding():
+		var slope: Vector2 = raycast_two.get_collision_normal().orthogonal()
+		return slope if slope.x > 0 else -slope
+	
+	print('not actually on the floor')
+	return Vector2(1, 0)
 	
 
 ## Suspend gravity for a set amount of time.
@@ -366,12 +412,3 @@ func _wall_vault() -> void:
 func _ceiling_hang(time: float) -> void:
 	await get_tree().create_timer(time).timeout
 	self.move_data.on_ceiling = false
-
-
-## Get the floor slope angle.
-func _get_floor_slope() -> Vector2:
-	var slope = self.get_floor_normal().orthogonal()
-	if slope.x < 0:
-		return slope * -1
-	else:
-		return slope
