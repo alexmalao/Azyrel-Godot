@@ -11,7 +11,7 @@ class_name PlayerProps
 @export var MAX_GROUND_SPEED: float = 1250.0
 
 @export var SLIDE_ACCEL: float = 2000.0
-@export var MIN_SLIDE_SPEED: float = 250.0
+@export var MIN_SLIDE_SPEED: float = 500.0
 @export var MAX_SLIDE_SPEED: float = 2500.0
 
 # speed penalty for being faster than max ground speed

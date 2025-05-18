@@ -29,8 +29,6 @@ func _ready():
 
 func _init():
 	# i'm not sure these entirely do something
-	self.floor_stop_on_slope = true
-	self.floor_constant_speed = true
 	self.floor_snap_length = 10.0
 
 func _physics_process(delta):
@@ -106,8 +104,8 @@ func dash():
 		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
 	elif self._is_grounded():
 		# ground dash
-		var new_vel
-		var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
+		var new_vel: float
+		var rel_magnitude: float = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
 		## executing jump or land, revoking magnitude
 		if abs(self.velocity.y) > abs(self.velocity.x) + 1.0:
 			rel_magnitude = 0
@@ -116,7 +114,7 @@ func dash():
 			new_vel = max(rel_magnitude, props.MAX_GROUND_SPEED)
 		else:
 			new_vel = min(rel_magnitude, -props.MAX_GROUND_SPEED)
-		self.velocity = Vector2(new_vel * 1, 0)
+		self.velocity = new_vel * self._get_floor_slope()
 		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
 	elif self._is_airborne():
 		# aerial dash
@@ -301,6 +299,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	var speed_penalty = props.GROUND_SPEED_PENALTY * delta
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
+	print('actual vel ', self.velocity)
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
 		move_input.x = 1 if ground_slope.y > 0 else -1
 		mod_magnitude = rel_magnitude + move_input.x * props.SLIDE_ACCEL * delta
@@ -310,6 +309,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		mod_magnitude = max(mod_magnitude, min_ground_speed)
 		if mod_magnitude > max_ground_speed and not self.move_data.dashing:
 			mod_magnitude = max(rel_magnitude - speed_penalty, max_ground_speed)
+		print('updated vel ', ground_slope * mod_magnitude)
 		return ground_slope * mod_magnitude
 	elif move_input.x == -1 and self.velocity.x < 0.01:
 		mod_magnitude = min(mod_magnitude, -min_ground_speed)
