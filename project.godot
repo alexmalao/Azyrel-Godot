@@ -162,5 +162,7 @@ dialogic_default_action={
 
 [physics]
 
+2d/run_on_separate_thread=true
+2d/physics_engine="GodotPhysics2D"
 3d/default_gravity=980.0
 2d/default_gravity=4500.0

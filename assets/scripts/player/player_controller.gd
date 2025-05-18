@@ -29,6 +29,8 @@ func _ready():
 
 func _init():
 	# i'm not sure these entirely do something
+	self.floor_stop_on_slope = false
+	self.floor_constant_speed = true
 	self.floor_snap_length = 0
 	self.set_floor_stop_on_slope_enabled(false)
 	# self.set_floor_max_angle(PI / 4)
@@ -227,6 +229,7 @@ func _ground_jump(jump_vel: float) -> void:
 	# delay disabling edge jump by 2 frames to allow ground jumping
 	await get_tree().process_frame
 	await get_tree().process_frame
+	await get_tree().process_frame
 	self.move_data.edge_jump = false
 
 
@@ -283,13 +286,13 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	
 	var ground_slope: Vector2 = self._get_floor_slope()
 
-	# if (self.move_data.last_frame_airborne
-	# 	and is_equal_approx(abs(ground_slope.x), abs(ground_slope.y))):
-	# 	print('landing')
-	# 	var landing_vel: Vector2 = self.move_data.last_frame_vel.length() * self._get_floor_slope()
-	# 	if landing_vel.y < 0:
-	# 		return -landing_vel
-	# 	return landing_vel
+	if (self.move_data.last_frame_airborne
+		and is_equal_approx(abs(ground_slope.x), abs(ground_slope.y))):
+		print('landing')
+		var landing_vel: Vector2 = self.move_data.last_frame_vel.length() * self._get_floor_slope() * .75
+		if abs(self.move_data.last_frame_vel.y) > abs(self.move_data.last_frame_vel.x) and landing_vel.y < 0:
+			return -landing_vel
+		return landing_vel
 
 	## executing jump, allow vertical momentum for a frame.
 	if abs(self.velocity.y) > abs(self.velocity.x) + 100.0 or self.move_data.edge_jump:
@@ -304,8 +307,6 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	var speed_penalty = props.GROUND_SPEED_PENALTY * delta
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
-	# print('actual vel ', self.velocity)
-	print('ground moving')
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
 		move_input.x = 1 if ground_slope.y > 0 else -1
 		mod_magnitude = rel_magnitude + move_input.x * props.SLIDE_ACCEL * delta
@@ -327,6 +328,8 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 			return Vector2(0.0, 0.0)
 		else:
 			rel_magnitude -= rel_magnitude * props.TRACTION * delta
+			if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)):
+				return ground_slope * rel_magnitude * pow(2, 1/2)
 			return ground_slope * rel_magnitude
 
 
