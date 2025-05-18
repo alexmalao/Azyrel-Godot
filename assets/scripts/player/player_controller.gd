@@ -29,7 +29,9 @@ func _ready():
 
 func _init():
 	# i'm not sure these entirely do something
-	self.floor_snap_length = 10.0
+	self.floor_snap_length = 0
+	self.set_floor_stop_on_slope_enabled(false)
+	# self.set_floor_max_angle(PI / 4)
 
 func _physics_process(delta):
 	self.update_move_data(delta)
@@ -208,6 +210,8 @@ func update_move_data(delta: float) -> void:
 		self.move_data.wall_running = false
 
 
+## PRIVATE METHODS
+
 ## Update the character sprite
 func _update_state() -> void:
 	_sprite.flip_h = self.move_data.facing_right
@@ -290,6 +294,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	## executing jump, allow vertical momentum for a frame.
 	if abs(self.velocity.y) > abs(self.velocity.x) + 100.0 or self.move_data.edge_jump:
 		return self.velocity
+	
 	var min_ground_speed: float = props.MIN_GROUND_SPEED
 	var max_ground_speed: float = props.MAX_GROUND_SPEED
 	# note that magnitudes here have a horizontal value based on whether it is
@@ -299,19 +304,19 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	var speed_penalty = props.GROUND_SPEED_PENALTY * delta
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
-	print('actual vel ', self.velocity)
+	# print('actual vel ', self.velocity)
+	print('ground moving')
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
 		move_input.x = 1 if ground_slope.y > 0 else -1
 		mod_magnitude = rel_magnitude + move_input.x * props.SLIDE_ACCEL * delta
 		min_ground_speed = props.MIN_SLIDE_SPEED
 		max_ground_speed = props.MAX_SLIDE_SPEED
-	if move_input.x == 1 and self.velocity.x > -0.01:
+	if move_input.x == 1 and self.velocity.x > -1:
 		mod_magnitude = max(mod_magnitude, min_ground_speed)
 		if mod_magnitude > max_ground_speed and not self.move_data.dashing:
 			mod_magnitude = max(rel_magnitude - speed_penalty, max_ground_speed)
-		print('updated vel ', ground_slope * mod_magnitude)
 		return ground_slope * mod_magnitude
-	elif move_input.x == -1 and self.velocity.x < 0.01:
+	elif move_input.x == -1 and self.velocity.x < 1:
 		mod_magnitude = min(mod_magnitude, -min_ground_speed)
 		if mod_magnitude < -max_ground_speed and not self.move_data.dashing:
 			mod_magnitude = min(rel_magnitude + speed_penalty, -max_ground_speed)
@@ -392,7 +397,7 @@ func _is_grounded() -> bool:
 		touching = touching or (-PI / 4 + 0.1 > angle and angle > -3 * PI / 4 - 0.1)
 	if raycast_two.is_colliding():
 		var angle: float = raycast_one.get_collision_normal().angle()
-		touching = touching or (-PI / 4 + 0.1 > angle and angle > -3 * PI / 4 - 0.1)
+		touching = touching or (-PI / 4 - 0.1 > angle and angle > -3 * PI / 4 - 0.1)
 	if touching:
 		self.apply_floor_snap()
 	return touching
@@ -447,3 +452,9 @@ func _ceiling_hang(time: float) -> void:
 	await get_tree().create_timer(time).timeout
 	self.move_data.has_ceiling_hang = false
 	self.move_data.on_ceiling = false
+
+
+## METHOD OVERRIDES
+
+func _is_on_floor():
+	return false

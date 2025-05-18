@@ -8,7 +8,7 @@ func _init():
 	# see PlayerProps for documentation
 	GROUND_ACCEL = 725.0
 	MIN_GROUND_SPEED = 475.0
-	MAX_GROUND_SPEED = 1275.0
+	MAX_GROUND_SPEED = 1250.0
 
 	GROUND_SPEED_PENALTY = 275.0
 	TRACTION = 7.0
