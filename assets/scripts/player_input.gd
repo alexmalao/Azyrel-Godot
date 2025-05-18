@@ -17,7 +17,7 @@ var input_signal_dict = {
 }
 
 
-const JUMP_HOLD_THRESHOLD = 0.08
+const JUMP_HOLD_THRESHOLD = 0.10
 
 var no_movement = false
 
