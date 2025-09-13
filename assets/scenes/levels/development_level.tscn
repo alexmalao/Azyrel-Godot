@@ -43,7 +43,7 @@ tile_map_data = PackedByteArray("AAAAAAAAAAADAAEAAAABAAAAAAAEAAEAAAACAAAAAAABAAE
 tile_set = SubResource("TileSet_cj0nh")
 
 [node name="azyrel" parent="." instance=ExtResource("2_pd15t")]
-position = Vector2(150, -107)
+position = Vector2(150, -13)
 
 [node name="Camera2D" type="Camera2D" parent="azyrel"]
 position = Vector2(-3, -260)

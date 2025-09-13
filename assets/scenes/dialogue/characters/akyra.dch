@@ -2,14 +2,14 @@
 "@path": "res://addons/dialogic/Resources/character.gd",
 "@subpath": NodePath(""),
 &"_translation_id": "",
-&"color": Color(1, 0.175781, 0.175781, 1),
+&"color": Color(0.753906, 0, 0, 1),
 &"custom_info": {
 "sound_mood_default": "",
 "sound_moods": {},
 "style": "character_style"
 },
 &"default_portrait": "default",
-&"description": "The coolest of the Synthia knights.",
+&"description": "The coolest of the Synthia Knights.",
 &"display_name": "Akyra",
 &"mirror": false,
 &"nicknames": [""],

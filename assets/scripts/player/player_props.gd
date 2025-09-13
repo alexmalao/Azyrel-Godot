@@ -15,7 +15,7 @@ class_name PlayerProps
 @export var MAX_SLIDE_SPEED: float = 2500.0
 
 # speed penalty for being faster than max ground speed
-@export var GROUND_SPEED_PENALTY: float = 250.0
+@export var GROUND_SPEED_PENALTY: float = 1250.0
 # amount of times velocity drops per second while sliding on the ground
 @export var TRACTION: float = 6.0
 # speed at which player will default stop while grounded

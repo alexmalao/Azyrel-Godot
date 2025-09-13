@@ -33,7 +33,7 @@ func _init():
 	self.floor_constant_speed = true
 	self.floor_snap_length = 0
 	self.set_floor_stop_on_slope_enabled(false)
-	# self.set_floor_max_angle(PI / 4)
+	self.set_floor_max_angle(PI / 4 - 0.1)
 
 func _physics_process(delta):
 	self.update_move_data(delta)
@@ -167,6 +167,7 @@ func update_move(delta: float):
 		self.velocity = self._get_wall_move(delta, move_input, -1)
 	elif self._is_grounded() or self.move_data.last_frame_grounded:
 		self.velocity = self._get_ground_move(delta, move_input)
+		self.move_data._vel = self.velocity
 	else:
 		self.velocity = self._get_airborne_move(delta, move_input)
 
@@ -286,13 +287,10 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	
 	var ground_slope: Vector2 = self._get_floor_slope()
 
-	if (self.move_data.last_frame_airborne
-		and is_equal_approx(abs(ground_slope.x), abs(ground_slope.y))):
+	if (self.move_data.last_frame_airborne):
 		print('landing')
-		var landing_vel: Vector2 = self.move_data.last_frame_vel.length() * self._get_floor_slope() * .75
-		if abs(self.move_data.last_frame_vel.y) > abs(self.move_data.last_frame_vel.x) and landing_vel.y < 0:
-			return -landing_vel
-		return landing_vel
+		## TODO: calculate projection here using projb a = ((a ⋅ b) / |b|²) * b
+		return project_vectors(self.move_data.last_frame_vel, self._get_floor_slope())
 
 	## executing jump, allow vertical momentum for a frame.
 	if abs(self.velocity.y) > abs(self.velocity.x) + 100.0 or self.move_data.edge_jump:
@@ -302,9 +300,10 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	var max_ground_speed: float = props.MAX_GROUND_SPEED
 	# note that magnitudes here have a horizontal value based on whether it is
 	# positive or negative, contrary to the naming
-	var rel_magnitude = self.velocity.length() if self.velocity.x > 0 else -self.velocity.length()
-	var mod_magnitude = rel_magnitude + move_input.x * props.GROUND_ACCEL * delta
-	var speed_penalty = props.GROUND_SPEED_PENALTY * delta
+	var vel: Vector2 = self.move_data.last_frame_vel
+	var rel_magnitude: float = vel.length() if vel.x > 0 else -vel.length()
+	var mod_magnitude: float = rel_magnitude + move_input.x * props.GROUND_ACCEL * delta
+	var speed_penalty: float = props.GROUND_SPEED_PENALTY * delta
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
@@ -411,15 +410,17 @@ func _get_floor_slope() -> Vector2:
 	
 	var raycast_one: RayCast2D = get_node("DownRaycast1")
 	var raycast_two: RayCast2D = get_node("DownRaycast2")
+	var slope: Vector2 = Vector2(1, 0)
 	if raycast_one.is_colliding():
-		var slope: Vector2 = raycast_one.get_collision_normal().orthogonal()
-		return slope if slope.x > 0 else -slope
+		var temp_slope: Vector2 = raycast_one.get_collision_normal().orthogonal()
+		slope = temp_slope if temp_slope.x > 0 else -temp_slope
 	if raycast_two.is_colliding():
-		var slope: Vector2 = raycast_two.get_collision_normal().orthogonal()
-		return slope if slope.x > 0 else -slope
+		var temp_slope: Vector2 = raycast_two.get_collision_normal().orthogonal()
+		temp_slope = temp_slope if temp_slope.x > 0 else -temp_slope
+		if abs(temp_slope.y / temp_slope.x) > abs(slope.y / slope.x):
+			slope = temp_slope
 	
-	print('not actually on the floor')
-	return Vector2(1, 0)
+	return slope
 	
 
 ## Suspend gravity for a set amount of time.
@@ -457,7 +458,10 @@ func _ceiling_hang(time: float) -> void:
 	self.move_data.on_ceiling = false
 
 
-## METHOD OVERRIDES
+## UTILITY METHODS
 
-func _is_on_floor():
-	return false
+func project_vectors(a: Vector2, b: Vector2) -> Vector2:
+	# projb a = ((a ⋅ b) / |b|²) * b
+	# redundant power, b.length() is 1
+	var new_magnitude: float = a.dot(b) / pow(b.length(), 2)
+	return new_magnitude * b

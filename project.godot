@@ -28,7 +28,7 @@ directories/dch_directory={
 directories/dtl_directory={
 "akyra_dev1": "res://assets/scenes/dialogue/akyra_dev1.dtl"
 }
-layout/style_list=["res://assets/scenes/dialogue/default_style.tres"]
+layout/style_list=[""]
 layout/default_style="res://assets/scenes/dialogue/default_style.tres"
 glossary/default_case_sensitive=true
 extensions_folder="res://addons/dialogic_additions"
