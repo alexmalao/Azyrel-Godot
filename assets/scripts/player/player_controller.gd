@@ -119,6 +119,7 @@ func dash():
 		else:
 			new_vel = min(rel_magnitude, -props.MAX_GROUND_SPEED)
 		self.velocity = new_vel * self._get_floor_slope()
+		self.move_data._vel = self.velocity
 		self._suspend_dash_gravity(props.DASH_FLOAT_DUR)
 	elif self._is_airborne():
 		# aerial dash
