@@ -27,7 +27,8 @@ directories/dch_directory={
 }
 directories/dtl_directory={
 "akyra_dev1": "res://assets/scenes/dialogue/akyra_dev1.dtl",
-"akyra_dev2": "res://assets/scenes/dialogue/akyra_dev2.dtl"
+"akyra_dev2": "res://assets/scenes/dialogue/akyra_dev2.dtl",
+"akyra_tutor1_open": "res://assets/scenes/dialogue/akyra_tutor1_open.dtl"
 }
 layout/style_list=[]
 layout/default_style="res://assets/scenes/dialogue/default_style.tres"

@@ -1,0 +1,36 @@
+join akyra right
+akyra: Hey Azyrel, welcome to the tutorial. None of what I'm gonna tell you is going to be in universe canon, so bear with me for a bit.
+leave --All--
+join azyrel left
+azyrel: I'm not really sure what "in universe canon" is, but okay what do you have to tell me?
+leave --All--
+join akyra right
+akyra: Go ahead and try moving around. I have your movement bound by default to WASD, so see if that's comfortable. If you have any questions let me know!
+- Who are you? | [=""]
+	leave --All--
+	join azyrel left
+	azyrel: I've not seen full fledged knights in this area, nor is the average traveller so inviting. Who even are you and what are you doing here?
+	leave --All--
+	join akyra right
+	akyra: Oh uh... I just happen to be in the area. From Caelum. Can never be too careful with all the monsters roaming around right?
+	akyra: Oh and my name's Akyra. Nice to meet you!
+	leave --All--
+	join azyrel left
+	azyrel: Yeah... likewise.
+	[end_timeline]
+- Where are we and why don't I remember anything?
+	leave --All--
+	join azyrel left
+	azyrel: God my head hurts and I don't really remember much recently. What even happened?
+	leave --All--
+	join akyra right
+	akyra: Your guess is as good as mine.
+	akyra: But I found you unconscious a day ago and have been waiting for you to wake up.
+	leave --All--
+	join azyrel left
+	azyrel: That really just sounds like you were watching me in my sleep...
+	azyrel: Imagine if the roles were reversed, heads would turn.
+	leave --All--
+	join akyra right
+	akyra: WOW RUDE to say to someone who was just making sure you were even alive.
+	[end_timeline]

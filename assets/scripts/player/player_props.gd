@@ -21,7 +21,7 @@ class_name PlayerProps
 # speed at which player will default stop while grounded
 @export var STOP_SPEED: float = 100.0
 
-@export var JUMP_VEL: float = 1750.0
+@export var JUMP_VEL: float = 1700.0
 @export var SHORT_JUMP_VEL: float = 1150.0
 
 @export var AIR_JUMP_VEL: float = 1750.0
@@ -40,9 +40,9 @@ class_name PlayerProps
 @export var WALL_SLIDE_ACCEL: float = 1500.0
 @export var WALL_SLIDE_MAX_SPEED: float = 750.0
 
-@export var WALL_RUN_DUR: float = 0.15
+@export var WALL_RUN_DUR: float = 0.20
 
 @export var CEILING_TRACTION: float = 3.5
 @export var CEILING_RUN_SPEED: float = 1000.0
 @export var CEILING_SLIDE_DUR: float = 0.3
-@export var CEILING_HANG_DUR: float = 0.6
+@export var CEILING_HANG_DUR: float = 0.4

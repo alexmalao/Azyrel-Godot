@@ -17,7 +17,7 @@
 &"portraits": {
 "default": {
 "export_overrides": {
-"image": "\"\""
+"image": "\"res://assets/sprites/characters/azyrel/azyrel_portrait.png\""
 },
 "mirror": false,
 "offset": Vector2(0, 0),

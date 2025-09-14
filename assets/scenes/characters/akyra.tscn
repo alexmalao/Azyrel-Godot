@@ -16,10 +16,10 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_va5is"]
-size = Vector2(100, 200)
+size = Vector2(100, 180)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_q26xf"]
-size = Vector2(50, 50)
+size = Vector2(100, 100)
 
 [node name="akyra" type="CharacterBody2D"]
 collision_layer = 2
@@ -34,7 +34,7 @@ animation = &"idle"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -100)
+position = Vector2(0, -90)
 shape = SubResource("RectangleShape2D_va5is")
 
 [node name="PlayerInput" parent="." instance=ExtResource("3_2tam0")]
