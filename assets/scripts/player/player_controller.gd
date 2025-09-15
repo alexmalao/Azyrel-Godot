@@ -50,13 +50,13 @@ func interact():
 
 ## Perform an aerial or wall jump if possible.
 func instant_jump():
-	if self._is_touching_wall(1) and self.move_data.on_right_wall and not self._is_grounded():
+	if self._is_touching_wall(1) and not self._is_grounded():
 		self.velocity = props.RIGHT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_right_wall = false
 		self.move_data.facing_right = false
 		self.move_data.reset_wall_run()
 		self._wall_vault()
-	elif self._is_touching_wall(-1) and self.move_data.on_left_wall and not self._is_grounded():
+	elif self._is_touching_wall(-1) and not self._is_grounded():
 		self.velocity = props.LEFT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_left_wall = false
 		self.move_data.facing_right = true
@@ -169,6 +169,9 @@ func update_move(delta: float):
 	elif self._is_grounded() or self.move_data.last_frame_grounded:
 		self.velocity = self._get_ground_move(delta, move_input)
 		self.move_data._vel = self.velocity
+		self.apply_floor_snap()
+		# if self.move_data.last_frame_grounded and not self._is_grounded():
+		# 	self._snap_to_ground()
 	else:
 		self.velocity = self._get_airborne_move(delta, move_input)
 
@@ -245,10 +248,21 @@ func _get_ceiling_move(delta: float, move_input: Vector2) -> Vector2:
 	var rel_magnitude: float = self.velocity.x
 
 	if self.move_data.last_frame_airborne:
-		self._ceiling_slide(props.CEILING_SLIDE_DUR)
 		if (move_input.x != 0 and ((move_input.x == 1 and rel_magnitude >= -0.1)
 			or (move_input.x == -1 and rel_magnitude <= 0.1))):
-		
+			if self.move_data.attempt_ceiling_run():
+				self._ceiling_slide(props.CEILING_SLIDE_DUR)
+				if (move_input.x != 0 and ((move_input.x == 1 and rel_magnitude >= -0.1)
+					or (move_input.x == -1 and rel_magnitude <= 0.1))):
+				
+					rel_magnitude = max(abs(self.velocity.x), props.CEILING_RUN_SPEED) * move_input.x
+					return rel_magnitude * ceiling_slope
+	
+	if (move_input.x == 1 and rel_magnitude > 0.1
+		or move_input.x == -1 and rel_magnitude < -0.1):
+		if self.move_data.attempt_ceiling_run():
+			self._ceiling_slide(props.CEILING_SLIDE_DUR)
+			
 			rel_magnitude = max(abs(self.velocity.x), props.CEILING_RUN_SPEED) * move_input.x
 			return rel_magnitude * ceiling_slope
 
@@ -412,19 +426,30 @@ func _is_grounded() -> bool:
 	if raycast_two.is_colliding():
 		var angle: float = raycast_one.get_collision_normal().angle()
 		touching = touching or (-PI / 4 - 0.1 > angle and angle > -3 * PI / 4 - 0.1)
-	if touching:
-		self.apply_floor_snap()
 	return touching
+
+
+# ## Snap the player the ground
+# func _snap_to_ground() -> void:
+# 	print('snap to ground?')
+# 	var raycast_one: RayCast2D = get_node("SnapRaycast1")
+# 	var raycast_two: RayCast2D = get_node("SnapRaycast2")
+# 	if raycast_one.is_colliding():
+# 		var floor_slope: Vector2 = self._get_slope("SnapRaycast1", "SnapRaycast2")
+# 		self.position = Vector2(self.position.x, raycast_one.get_collision_point().y + floor_slope.y * 45)
+# 	elif raycast_two.is_colliding():
+# 		var floor_slope: Vector2 = self._get_slope("SnapRaycast1", "SnapRaycast2")
+# 		self.position = Vector2(self.position.x, raycast_two.get_collision_point().y + floor_slope.y * 45)
 
 
 ## Get the floor slope angle.
 func _get_floor_slope() -> Vector2:
-	
 	return self._get_slope("DownRaycast1", "DownRaycast2")
 
 
 ## Get the ceiling slope angle.
 func _get_ceiling_slope() -> Vector2:
+	# TODO call helper
 	
 	var raycast_one: RayCast2D = get_node("UpRaycast1")
 	var raycast_two: RayCast2D = get_node("UpRaycast2")

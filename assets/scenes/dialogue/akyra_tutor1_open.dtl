@@ -6,6 +6,7 @@ azyrel: I'm not really sure what "in universe canon" is, but okay what do you ha
 leave --All--
 join akyra right
 akyra: Go ahead and try moving around. I have your movement bound by default to WASD, so see if that's comfortable. If you have any questions let me know!
+label Choices
 - Who are you? | [=""]
 	leave --All--
 	join azyrel left
@@ -17,11 +18,11 @@ akyra: Go ahead and try moving around. I have your movement bound by default to 
 	leave --All--
 	join azyrel left
 	azyrel: Yeah... likewise.
-	[end_timeline]
+	jump Choices
 - Where are we and why don't I remember anything?
 	leave --All--
 	join azyrel left
-	azyrel: God my head hurts and I don't really remember much recently. What even happened?
+	azyrel: Gods my head hurts and I don't really remember much recently. What even happened?
 	leave --All--
 	join akyra right
 	akyra: Your guess is as good as mine.
@@ -33,4 +34,9 @@ akyra: Go ahead and try moving around. I have your movement bound by default to 
 	leave --All--
 	join akyra right
 	akyra: WOW RUDE to say to someone who was just making sure you were even alive.
+	jump Choices
+- I'm good.
+	leave --All--
+	join azyrel left
+	azyrel: I think I can figure things out by myself. Be seeing ya.
 	[end_timeline]

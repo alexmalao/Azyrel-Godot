@@ -8,6 +8,7 @@ class_name PlayerMoveData
 @export var cur_jumps: int = 1
 @export var has_wall_run: bool = true
 @export var has_ceiling_hang: bool = true
+@export var has_ceiling_run: bool = true
 @export var facing_right: bool = false
 @export var on_right_wall: bool = false
 @export var on_left_wall: bool = false
@@ -38,6 +39,7 @@ func _ready():
 func reset_wall_run():
 	self.has_wall_run = true
 	self.has_ceiling_hang = true
+	self.has_ceiling_run = true
 	self.wall_running = false
 
 
@@ -57,6 +59,14 @@ func attempt_ceiling_hang():
 	return false
 
 
+## Determine whether a ceiling run is possible, then disable the ceiling run.
+func attempt_ceiling_run():
+	if self.has_ceiling_run:
+		self.has_ceiling_run = false
+		return true
+	return false
+
+
 ## Reset the total amount of jumps. Call this upon landing.
 func reset_jumps(total_jumps: int):
 	self.cur_jumps = total_jumps
@@ -64,6 +74,7 @@ func reset_jumps(total_jumps: int):
 
 ## Determine whether a jump is possible, then decrement the available jumps.
 func attempt_jump():
+	print(self.cur_jumps)
 	if self.cur_jumps > 0:
 		self.cur_jumps -= 1
 		return true
