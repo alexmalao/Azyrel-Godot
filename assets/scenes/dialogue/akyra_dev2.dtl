@@ -5,6 +5,6 @@ akyra: I'm just here for the developer to figure out what the fuck he's doing.
 leave --All--
 join azyrel left
 azyrel: I guess then I'll try to figure it out myself?
-leave 
+leave --All--
 join akyra right
 akyra: Yeah go do that. I believe in you!

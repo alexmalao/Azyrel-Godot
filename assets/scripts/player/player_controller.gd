@@ -245,35 +245,36 @@ func _get_ceiling_move(delta: float, move_input: Vector2) -> Vector2:
 
 	# note that magnitudes here have a horizontal value based on whether it is
 	# positive or negative, contrary to the naming
-	var rel_magnitude: float = self.velocity.x
+
+	var rel_magnitude: float = self.velocity.length()
 
 	if self.move_data.last_frame_airborne:
-		if (move_input.x != 0 and ((move_input.x == 1 and rel_magnitude >= -0.1)
-			or (move_input.x == -1 and rel_magnitude <= 0.1))):
+		if ((move_input.x == 1 and self.velocity.x >= -0.1)
+			or (move_input.x == -1 and self.velocity.x <= 0.1)):
 			if self.move_data.attempt_ceiling_run():
 				self._ceiling_slide(props.CEILING_SLIDE_DUR)
-				if (move_input.x != 0 and ((move_input.x == 1 and rel_magnitude >= -0.1)
-					or (move_input.x == -1 and rel_magnitude <= 0.1))):
+				if (move_input.x != 0 and ((move_input.x == 1 and self.velocity.x >= -0.1)
+					or (move_input.x == -1 and self.velocity.x <= 0.1))):
 				
 					rel_magnitude = max(abs(self.velocity.x), props.CEILING_RUN_SPEED) * move_input.x
 					return rel_magnitude * ceiling_slope
 	
-	if (move_input.x == 1 and rel_magnitude > 0.1
-		or move_input.x == -1 and rel_magnitude < -0.1):
+	if (move_input.x == 1 and self.velocity.x > 0.1
+		or move_input.x == -1 and self.velocity.x < -0.1):
 		if self.move_data.attempt_ceiling_run():
 			self._ceiling_slide(props.CEILING_SLIDE_DUR)
 			
 			rel_magnitude = max(abs(self.velocity.x), props.CEILING_RUN_SPEED) * move_input.x
 			return rel_magnitude * ceiling_slope
-
 	# stop the character
-	if absf(rel_magnitude) < props.STOP_SPEED:
+	if absf(self.velocity.length()) < props.STOP_SPEED:
 		self._ceiling_hang(props.CEILING_HANG_DUR)
 		return Vector2(0, 0)
 	elif not self.move_data.ceiling_sliding:
-		rel_magnitude -= rel_magnitude * props.CEILING_TRACTION * delta
-		return rel_magnitude * ceiling_slope
-	return rel_magnitude * ceiling_slope
+		var retained_speed_ratio: float = ((rel_magnitude - rel_magnitude * props.CEILING_TRACTION * delta)
+											/ rel_magnitude)
+		return self.project_vectors(self.velocity * retained_speed_ratio, ceiling_slope)
+	return self.project_vectors(self.velocity, ceiling_slope)
 
 
 ## Get the velocity vector of the player for wall movement.
