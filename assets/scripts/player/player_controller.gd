@@ -450,27 +450,11 @@ func _get_floor_slope() -> Vector2:
 
 ## Get the ceiling slope angle.
 func _get_ceiling_slope() -> Vector2:
-	# TODO call helper
-	
-	var raycast_one: RayCast2D = get_node("UpRaycast1")
-	var raycast_two: RayCast2D = get_node("UpRaycast2")
-	var slope: Vector2 = Vector2(1, 0)
-	if raycast_one.is_colliding():
-		var temp_slope: Vector2 = raycast_one.get_collision_normal().orthogonal()
-		slope = temp_slope if temp_slope.x > 0 else -temp_slope
-	if raycast_two.is_colliding():
-		var temp_slope: Vector2 = raycast_two.get_collision_normal().orthogonal()
-		temp_slope = temp_slope if temp_slope.x > 0 else -temp_slope
-		if abs(temp_slope.y / temp_slope.x) > abs(slope.y / slope.x):
-			slope = temp_slope
-	
-	return slope
+	return self._get_slope("UpRaycast1", "UpRaycast2")
 
 
 # helper to get sharpest slope angle given two raycasts
-func _get_slope(raycast_str_one: String, raycast_str_two: String):
-
-	# TODO: use this helper for where it's needed
+func _get_slope(raycast_str_one: String, raycast_str_two: String, horizontal: bool = true):
 	
 	var raycast_one: RayCast2D = get_node(raycast_str_one)
 	var raycast_two: RayCast2D = get_node(raycast_str_two)
@@ -481,7 +465,9 @@ func _get_slope(raycast_str_one: String, raycast_str_two: String):
 	if raycast_two.is_colliding():
 		var temp_slope: Vector2 = raycast_two.get_collision_normal().orthogonal()
 		temp_slope = temp_slope if temp_slope.x > 0 else -temp_slope
-		if abs(temp_slope.y / temp_slope.x) > abs(slope.y / slope.x):
+		if horizontal and abs(temp_slope.y / temp_slope.x) > abs(slope.y / slope.x):
+			slope = temp_slope
+		if not horizontal and abs(temp_slope.x / temp_slope.y) > abs(slope.x / slope.y):
 			slope = temp_slope
 	
 	return slope

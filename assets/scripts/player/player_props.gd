@@ -42,7 +42,7 @@ class_name PlayerProps
 
 @export var WALL_RUN_DUR: float = 0.20
 
-@export var CEILING_TRACTION: float = 3.5
+@export var CEILING_TRACTION: float = 5.0
 @export var CEILING_RUN_SPEED: float = 1000.0
 @export var CEILING_SLIDE_DUR: float = 0.3
 @export var CEILING_HANG_DUR: float = 0.4
