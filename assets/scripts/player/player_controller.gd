@@ -280,6 +280,8 @@ func _get_ceiling_move(delta: float, move_input: Vector2) -> Vector2:
 ## Get the velocity vector of the player for wall movement.
 func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int) -> Vector2:
 	
+	var wall_slope: Vector2 = self._get_wall_slope(wall_dir)
+	
 	if move_input.x == -wall_dir:
 		# no longer touching the wall
 		self.move_data.on_left_wall = false
@@ -289,16 +291,19 @@ func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int) -> Vector2
 	if move_input.y == -1 and self.move_data.attempt_wall_run():
 		self._wall_run(props.WALL_RUN_DUR)
 
-	var new_y_vel = self.velocity.y
-	if new_y_vel > props.WALL_SLIDE_MAX_SPEED:
-		new_y_vel = min(props.WALL_SLIDE_MAX_SPEED, new_y_vel - props.WALL_SLIDE_ACCEL * delta)
-	elif new_y_vel < props.WALL_SLIDE_MAX_SPEED:
-		new_y_vel = max(-props.WALL_SLIDE_MAX_SPEED, new_y_vel + props.WALL_SLIDE_ACCEL * delta)
+	var new_magnitude: float = self.velocity.length() if self.velocity.y > 0 else -self.velocity.length()
+	if new_magnitude > props.WALL_SLIDE_MAX_SPEED:
+		new_magnitude = min(props.WALL_SLIDE_MAX_SPEED, new_magnitude - props.WALL_SLIDE_ACCEL * delta)
+	elif new_magnitude < props.WALL_SLIDE_MAX_SPEED:
+		new_magnitude = max(-props.WALL_SLIDE_MAX_SPEED, new_magnitude + props.WALL_SLIDE_ACCEL * delta)
+	# var retained_speed_ratio: float = new_magnitude / self.velocity.length()
 	
 	if self.move_data.wall_running:
-		return Vector2(0, min(new_y_vel, -props.WALL_RUN_SPEED))
+		if new_magnitude < -props.WALL_RUN_SPEED:
+			return wall_slope * new_magnitude
+		return wall_slope * -props.WALL_RUN_SPEED
 
-	return Vector2(0, new_y_vel)
+	return new_magnitude * wall_slope
 
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
@@ -453,7 +458,17 @@ func _get_ceiling_slope() -> Vector2:
 	return self._get_slope("UpRaycast1", "UpRaycast2")
 
 
-# helper to get sharpest slope angle given two raycasts
+## get the wall slope angle.
+func _get_wall_slope(horizontal: int) -> Vector2:
+	if horizontal < 0:
+		return self._get_slope("LeftRaycast1", "LeftRaycast2", false)
+	elif horizontal > 0:
+		return self._get_slope("RightRaycast1", "RightRaycast2", false)
+	
+	return Vector2(0, 1)
+
+
+# helper to get sharpest slope angle given two raycasts.
 func _get_slope(raycast_str_one: String, raycast_str_two: String, horizontal: bool = true):
 	
 	var raycast_one: RayCast2D = get_node(raycast_str_one)
@@ -461,14 +476,20 @@ func _get_slope(raycast_str_one: String, raycast_str_two: String, horizontal: bo
 	var slope: Vector2 = Vector2(1, 0)
 	if raycast_one.is_colliding():
 		var temp_slope: Vector2 = raycast_one.get_collision_normal().orthogonal()
-		slope = temp_slope if temp_slope.x > 0 else -temp_slope
+		if horizontal:
+			slope = temp_slope if temp_slope.x > 0 else -temp_slope
+		else:
+			slope = temp_slope if temp_slope.y > 0 else -temp_slope
 	if raycast_two.is_colliding():
 		var temp_slope: Vector2 = raycast_two.get_collision_normal().orthogonal()
-		temp_slope = temp_slope if temp_slope.x > 0 else -temp_slope
-		if horizontal and abs(temp_slope.y / temp_slope.x) > abs(slope.y / slope.x):
-			slope = temp_slope
-		if not horizontal and abs(temp_slope.x / temp_slope.y) > abs(slope.x / slope.y):
-			slope = temp_slope
+		if horizontal:
+			temp_slope = temp_slope if temp_slope.x > 0 else -temp_slope
+			if abs(temp_slope.y / temp_slope.x) > abs(slope.y / slope.x):
+				slope = temp_slope
+		else:
+			slope = temp_slope if temp_slope.y > 0 else -temp_slope
+			if abs(temp_slope.x / temp_slope.y) > abs(slope.x / slope.y):
+				slope = temp_slope
 	
 	return slope
 	

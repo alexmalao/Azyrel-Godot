@@ -28,7 +28,10 @@ directories/dch_directory={
 directories/dtl_directory={
 "akyra_dev1": "res://assets/scenes/dialogue/akyra_dev1.dtl",
 "akyra_dev2": "res://assets/scenes/dialogue/akyra_dev2.dtl",
-"akyra_tutor1_open": "res://assets/scenes/dialogue/akyra_tutor1_open.dtl"
+"akyra_tutor1_open": "res://assets/scenes/dialogue/akyra_tutor1_open.dtl",
+"akyra_tutor2_open": "res://assets/scenes/dialogue/akyra_tutor2_open.dtl",
+"akyra_tutor3_open": "res://assets/scenes/dialogue/akyra_tutor3_open.dtl",
+"akyra_tutor4_open": "res://assets/scenes/dialogue/akyra_tutor4_open.dtl"
 }
 layout/style_list=[]
 layout/default_style="res://assets/scenes/dialogue/default_style.tres"
@@ -58,6 +61,7 @@ variables={}
 animations/join_default="Instant In"
 animations/leave_default="Instant Out"
 portraits/default_portrait=""
+text/autoadvance_fixed_delay=2.0
 
 [display]
 
