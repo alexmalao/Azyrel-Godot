@@ -10,7 +10,7 @@ var interact_box: Area2D
 var _velocity: Vector2
 
 @export var char_width: float = 100
-@export var char_height: float = 180
+@export var char_height: float = 190
 @onready var _sprite = $AnimatedSprite2D
 
 
@@ -60,11 +60,13 @@ func instant_jump():
 		self._velocity = props.RIGHT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_right_wall = false
 		self.move_data.facing_right = false
+		self.move_data.reset_wall_run()
 		self._wall_vault()
 	elif self._is_touching_wall(-1) and not self._is_grounded():
 		self._velocity = props.LEFT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_left_wall = false
 		self.move_data.facing_right = true
+		self.move_data.reset_wall_run()
 		self._wall_vault()
 	elif self._is_airborne() and self.move_data.attempt_jump():
 		self.move_data.dashing = false
@@ -157,8 +159,6 @@ func short_jump():
 
 ## Update the position of the player
 func update_position(delta: float):
-	var x: float = self.position.x
-	var y: float = self.position.y
 	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
 	# corner positions relative to character height and width
 	var corner_offsets: Array[Vector2] = [
@@ -168,19 +168,27 @@ func update_position(delta: float):
 		Vector2(-self.char_width / 2, -self.char_height),
 	]
 
-	# use velocity raycasts for continuous collision detection
-	for offset in corner_offsets:
-		var br_query = PhysicsRayQueryParameters2D.create(
-			Vector2(x + offset.x, y + offset.y),
-			Vector2(x + offset.x + self._velocity.x * delta, y + offset.y + self._velocity.y * delta),
-			1)
-		var result: Dictionary = space_state.intersect_ray(br_query)
-		if result:
-			self.position = Vector2(
-				 result.position.x - offset.x,
-				 result.position.y - offset.y,
-			)
-			return
+	var colliding: bool = true
+	var frame_vel: Vector2 = self._velocity * delta
+	while colliding:
+		# use velocity raycasts for continuous collision detection
+		colliding = false
+		for offset in corner_offsets:
+			# store the new position to calculate leftover velocity
+			var to_pos: Vector2 = Vector2(self.position.x + offset.x + frame_vel.x,
+										  self.position.y + offset.y + frame_vel.y)
+			var br_query = PhysicsRayQueryParameters2D.create(
+				Vector2(self.position.x + offset.x, self.position.y + offset.y),
+				to_pos,
+				1)
+			var result: Dictionary = space_state.intersect_ray(br_query)
+			if result:
+				self.position = Vector2(
+					result.position.x - offset.x,
+					result.position.y - offset.y,
+				)
+				colliding = true
+				frame_vel = self.project_vectors(to_pos - result.position, result.normal.orthogonal())
 
 	self.position = Vector2(self.position.x + self._velocity.x * delta,
 							self.position.y + self._velocity.y * delta)
@@ -218,7 +226,9 @@ func update_move_data(delta: float) -> void:
 	var move_input = self.player_input.get_directional_input()
 	
 	self.move_data.last_frame_grounded = self.move_data._grounded
-	if self._is_grounded():
+	if self._is_touching_ceiling() and move_input.y == -1 and self.move_data.attempt_ceiling_hang():
+		self.move_data.on_ceiling = true
+	elif self._is_grounded():
 		self.move_data.update_direction(self._velocity.x)
 		self.move_data.reset_jumps(props.JUMPS)
 		self.move_data.reset_wall_run()
@@ -230,9 +240,7 @@ func update_move_data(delta: float) -> void:
 	
 	self.move_data.last_frame_airborne = self.move_data._airborne
 	self.move_data._airborne = self._is_airborne()
-	if self._is_touching_ceiling() and move_input.y == -1 and self.move_data.attempt_ceiling_hang():
-		self.move_data.on_ceiling = true
-	elif not self._is_touching_ceiling() or move_input.y != -1 :
+	if not self._is_touching_ceiling() or move_input.y != -1 :
 		self.move_data.on_ceiling = false
 		self.move_data.ceiling_sliding = false
 	# only attach to the wall if there is a towards input

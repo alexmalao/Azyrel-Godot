@@ -16,7 +16,7 @@ animations = [{
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_gp0qq"]
-size = Vector2(100, 180)
+size = Vector2(100, 190)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qt236"]
 size = Vector2(100, 100)
@@ -35,7 +35,7 @@ animation = &"idle"
 autoplay = "idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -90)
+position = Vector2(0, -95)
 shape = SubResource("RectangleShape2D_gp0qq")
 
 [node name="PlayerInput" parent="." instance=ExtResource("3_xnjfa")]
@@ -50,31 +50,33 @@ shape = SubResource("RectangleShape2D_qt236")
 debug_color = Color(0.294419, 0.629214, 1.34766e-06, 0.42)
 
 [node name="RightRaycast1" type="RayCast2D" parent="."]
+position = Vector2(0, -1)
 target_position = Vector2(60, 0)
 
 [node name="RightRaycast2" type="RayCast2D" parent="."]
-position = Vector2(0, -180)
+position = Vector2(0, -189)
 target_position = Vector2(60, 0)
 
 [node name="LeftRaycast1" type="RayCast2D" parent="."]
+position = Vector2(0, -1)
 target_position = Vector2(-60, 0)
 
 [node name="LeftRaycast2" type="RayCast2D" parent="."]
-position = Vector2(0, -180)
+position = Vector2(0, -189)
 target_position = Vector2(-60, 0)
 
 [node name="UpRaycast1" type="RayCast2D" parent="."]
-position = Vector2(-50, -130)
+position = Vector2(-49, -140)
 target_position = Vector2(0, -60)
 
 [node name="UpRaycast2" type="RayCast2D" parent="."]
-position = Vector2(50, -130)
+position = Vector2(49, -140)
 target_position = Vector2(0, -60)
 
 [node name="DownRaycast1" type="RayCast2D" parent="."]
-position = Vector2(-50, -50)
+position = Vector2(-49, -50)
 target_position = Vector2(0, 60)
 
 [node name="DownRaycast2" type="RayCast2D" parent="."]
-position = Vector2(50, -50)
+position = Vector2(49, -50)
 target_position = Vector2(0, 60)
