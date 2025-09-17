@@ -60,13 +60,11 @@ func instant_jump():
 		self._velocity = props.RIGHT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_right_wall = false
 		self.move_data.facing_right = false
-		self.move_data.reset_wall_run()
 		self._wall_vault()
 	elif self._is_touching_wall(-1) and not self._is_grounded():
 		self._velocity = props.LEFT_WALL_JUMP_VECTOR * props.WALL_JUMP_SPEED
 		self.move_data.on_left_wall = false
 		self.move_data.facing_right = true
-		self.move_data.reset_wall_run()
 		self._wall_vault()
 	elif self._is_airborne() and self.move_data.attempt_jump():
 		self.move_data.dashing = false
@@ -324,20 +322,31 @@ func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int) -> Vector2
 		self.move_data.wall_running = false
 		return self._velocity
 	if move_input.y == -1 and self.move_data.attempt_wall_run():
+		print('starting wall run')
 		self._wall_run(props.WALL_RUN_DUR)
 
 	var new_magnitude: float = self._velocity.length() if self._velocity.y > 0 else -self._velocity.length()
-	if new_magnitude > props.WALL_SLIDE_MAX_SPEED:
-		new_magnitude = min(props.WALL_SLIDE_MAX_SPEED, new_magnitude - props.WALL_SLIDE_ACCEL * delta)
-	elif new_magnitude < props.WALL_SLIDE_MAX_SPEED:
+	# sliding upwards too fast
+	if new_magnitude < -props.WALL_SLIDE_MAX_SPEED:
 		new_magnitude = max(-props.WALL_SLIDE_MAX_SPEED, new_magnitude + props.WALL_SLIDE_ACCEL * delta)
+	elif new_magnitude > props.WALL_SLIDE_MAX_SPEED:
+		new_magnitude = min(props.WALL_SLIDE_MAX_SPEED, new_magnitude - props.WALL_SLIDE_ACCEL * delta)
+	else:
+		new_magnitude = min(props.WALL_SLIDE_MAX_SPEED, new_magnitude + props.WALL_SLIDE_ACCEL * delta)
 	
+	var retained_speed_ratio: float = 1
+	if not is_equal_approx(self._velocity.length(), 0):
+		retained_speed_ratio = abs(new_magnitude) / self._velocity.length()
+	else:
+		return new_magnitude * wall_slope
+	
+	## run up the wall
 	if self.move_data.wall_running:
 		if new_magnitude < -props.WALL_RUN_SPEED:
-			return wall_slope * new_magnitude
+			return self.project_vectors(self._velocity, wall_slope) * retained_speed_ratio
 		return wall_slope * -props.WALL_RUN_SPEED
-
-	return new_magnitude * wall_slope
+	
+	return self.project_vectors(self._velocity, wall_slope) * retained_speed_ratio
 
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
@@ -349,7 +358,8 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		return project_vectors(self._velocity, self._get_floor_slope())
 
 	## executing jump, allow vertical momentum for a frame.
-	if -self._velocity.y > abs(self._velocity.x) + 100.0 or self.move_data.edge_jump:
+	if ((-self._velocity.y > abs(self._velocity.x) + 100.0 or self.move_data.edge_jump)
+		and self.move_data.last_frame_grounded):
 		return self._velocity
 	
 	var min_ground_speed: float = props.MIN_GROUND_SPEED
@@ -370,7 +380,6 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		max_ground_speed = props.MAX_SLIDE_SPEED
 	if move_input.x == 1 and self._velocity.x > -1:
 		mod_magnitude = max(mod_magnitude, min_ground_speed)
-		print('moving right')
 		if mod_magnitude > max_ground_speed and not self.move_data.dashing:
 			mod_magnitude = max(rel_magnitude - speed_penalty, max_ground_speed)
 		return ground_slope * mod_magnitude
@@ -463,9 +472,13 @@ func _is_grounded() -> bool:
 	var raycast_two: RayCast2D = get_node("DownRaycast2")
 	if raycast_one.is_colliding():
 		var angle: float = raycast_one.get_collision_normal().angle()
+		# TODO: Figure this out
+		# print(angle)
 		touching = touching or (-PI / 4 + 0.1 > angle and angle > -3 * PI / 4 - 0.1)
 	if raycast_two.is_colliding():
 		var angle: float = raycast_one.get_collision_normal().angle()
+		# TODO: Figure this out
+		# print(angle)
 		touching = touching or (-PI / 4 - 0.1 > angle and angle > -3 * PI / 4 - 0.1)
 	return touching
 

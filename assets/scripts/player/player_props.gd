@@ -21,10 +21,10 @@ class_name PlayerProps
 # speed at which player will default stop while grounded
 @export var STOP_SPEED: float = 100.0
 
-@export var JUMP_VEL: float = 1700.0
+@export var JUMP_VEL: float = 1500.0
 @export var SHORT_JUMP_VEL: float = 1150.0
 
-@export var AIR_JUMP_VEL: float = 1750.0
+@export var AIR_JUMP_VEL: float = 1500.0
 @export var AIR_TRACTION: float = 0.12
 @export var AIR_JUMP_STOP_SPEED: float = 500.0
 @export var AIR_X_ACCEL: float = 1250.0
@@ -36,7 +36,7 @@ class_name PlayerProps
 @export var RIGHT_WALL_JUMP_VECTOR = Vector2(-1, -2).normalized()
 @export var LEFT_WALL_JUMP_VECTOR = Vector2(1, -2).normalized()
 @export var WALL_RUN_SPEED: float = 1000.0
-@export var WALL_JUMP_SPEED: float = 1750.0
+@export var WALL_JUMP_SPEED: float = 1650.0
 @export var WALL_SLIDE_ACCEL: float = 1500.0
 @export var WALL_SLIDE_MAX_SPEED: float = 750.0
 
