@@ -330,31 +330,24 @@ func _get_wall_move(delta: float, move_input: Vector2, wall_dir: int) -> Vector2
 		self.move_data.wall_running = false
 		return self._velocity
 	if move_input.y == -1 and self.move_data.attempt_wall_run():
-		print('starting wall run')
 		self._wall_run(props.WALL_RUN_DUR)
 
-	var new_magnitude: float = self._velocity.length() if self._velocity.y > 0 else -self._velocity.length()
+	var temp_vel: Vector2 = self.project_vectors(self._velocity, wall_slope)
+
+	var new_magnitude: float = temp_vel.length() if temp_vel.y > 0 else -temp_vel.length()
 	# sliding upwards too fast
-	if new_magnitude < -props.WALL_SLIDE_MAX_SPEED:
-		new_magnitude = max(-props.WALL_SLIDE_MAX_SPEED, new_magnitude + props.WALL_SLIDE_ACCEL * delta)
-	elif new_magnitude > props.WALL_SLIDE_MAX_SPEED:
-		new_magnitude = min(props.WALL_SLIDE_MAX_SPEED, new_magnitude - props.WALL_SLIDE_ACCEL * delta)
-	else:
+	if new_magnitude < props.WALL_SLIDE_MAX_SPEED:
 		new_magnitude = min(props.WALL_SLIDE_MAX_SPEED, new_magnitude + props.WALL_SLIDE_ACCEL * delta)
-	
-	var retained_speed_ratio: float = 1
-	if not is_equal_approx(self._velocity.length(), 0):
-		retained_speed_ratio = abs(new_magnitude) / self._velocity.length()
 	else:
-		return new_magnitude * wall_slope
+		new_magnitude = max(props.WALL_SLIDE_MAX_SPEED, new_magnitude - props.WALL_SLIDE_ACCEL * delta)
 	
 	## run up the wall
 	if self.move_data.wall_running:
 		if new_magnitude < -props.WALL_RUN_SPEED:
-			return self.project_vectors(self._velocity, wall_slope) * retained_speed_ratio
+			return new_magnitude * wall_slope
 		return wall_slope * -props.WALL_RUN_SPEED
 	
-	return self.project_vectors(self._velocity, wall_slope) * retained_speed_ratio
+	return new_magnitude * wall_slope
 
 ## Get the velocity vector for grounded movement
 func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:

@@ -37,10 +37,10 @@ class_name PlayerProps
 @export var LEFT_WALL_JUMP_VECTOR = Vector2(1, -2).normalized()
 @export var WALL_RUN_SPEED: float = 1000.0
 @export var WALL_JUMP_SPEED: float = 1650.0
-@export var WALL_SLIDE_ACCEL: float = 1500.0
+@export var WALL_SLIDE_ACCEL: float = 2000.0
 @export var WALL_SLIDE_MAX_SPEED: float = 750.0
 
-@export var WALL_RUN_DUR: float = 0.20
+@export var WALL_RUN_DUR: float = 0.15
 
 @export var CEILING_TRACTION: float = 5.0
 @export var CEILING_RUN_SPEED: float = 1000.0
