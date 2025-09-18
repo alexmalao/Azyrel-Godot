@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 [autoload]
 
 Dialogic="*res://addons/dialogic/Core/DialogicGameHandler.gd"
+PhantomCameraManager="*res://addons/phantom_camera/scripts/managers/phantom_camera_manager.gd"
 
 [dialogic]
 
@@ -77,7 +78,7 @@ project/assembly_name="Azyrel"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/dialogic/plugin.cfg")
+enabled=PackedStringArray("res://addons/dialogic/plugin.cfg", "res://addons/phantom_camera/plugin.cfg")
 
 [input]
 
@@ -176,6 +177,6 @@ dialogic_default_action={
 
 [rendering]
 
-environment/defaults/default_clear_color=Color(0.375757, 0.634418, 0.734723, 1)
+environment/defaults/default_clear_color=Color(0.408155, 0.630562, 0.715899, 1)
 anti_aliasing/quality/use_taa=true
 environment/quality/use_taa=true

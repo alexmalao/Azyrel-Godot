@@ -3,10 +3,12 @@ extends CharacterBody2D
 class_name PlayerController
 
 
+var interact_box: Area2D
+
 var props = PlayerProps
 var move_data: PlayerMoveData
 var player_input: PlayerInput
-var interact_box: Area2D
+
 var _velocity: Vector2
 
 @export var char_width: float = 100
@@ -19,10 +21,11 @@ var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 
 func _ready():
+	self.interact_box = get_node("InteractBox")
+
 	self.props = PlayerProps.new()
 	self.move_data = PlayerMoveData.new()
 	self.player_input = get_node("PlayerInput")
-	self.interact_box = get_node("InteractBox")
 	self._velocity = Vector2(0, 0)
 
 	self.player_input.instant_jump_requested.connect(self.instant_jump)
@@ -40,7 +43,7 @@ func _init():
 	self.set_floor_stop_on_slope_enabled(false)
 	self.set_floor_max_angle(PI / 8 - 0.1)
 
-func _physics_process(delta):
+func _physics_process(delta: float):
 	self.update_position(delta)
 	self.update_move_data(delta)
 	self.update_move(delta)
@@ -373,10 +376,13 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
-		move_input.x = 1 if ground_slope.y > 0 else -1
-		mod_magnitude = rel_magnitude + move_input.x * props.SLIDE_ACCEL * delta
-		min_ground_speed = props.MIN_SLIDE_SPEED
-		max_ground_speed = props.MAX_SLIDE_SPEED
+		# TODO: make holding down only apply at the correct times
+		if move_input.x == 0:
+			move_input.x = 1 if ground_slope.y > 0 else -1
+		if (move_input.x == 1 and ground_slope.y > 0) or (move_input.x == -1 and ground_slope.y < 0):
+			mod_magnitude = rel_magnitude + move_input.x * props.SLIDE_ACCEL * delta
+			min_ground_speed = props.MIN_SLIDE_SPEED
+			max_ground_speed = props.MAX_SLIDE_SPEED
 	if move_input.x == 1 and self._velocity.x > -1:
 		mod_magnitude = max(mod_magnitude, min_ground_speed)
 		if mod_magnitude > max_ground_speed and not self.move_data.dashing:

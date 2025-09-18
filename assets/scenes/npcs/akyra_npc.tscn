@@ -1,7 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://dolbhfbsgwai1"]
+[gd_scene load_steps=8 format=3 uid="uid://dolbhfbsgwai1"]
 
 [ext_resource type="Script" uid="uid://c7ynct63j8fsn" path="res://assets/scripts/npc/npc_interact.gd" id="1_42gci"]
 [ext_resource type="Texture2D" uid="uid://casjsb3iv188i" path="res://assets/sprites/characters/akyra/akyra_run.png" id="1_sqxjx"]
+[ext_resource type="Script" uid="uid://bhexx6mj1xv3q" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_2d.gd" id="2_r2ot1"]
+[ext_resource type="Resource" uid="uid://cgi6rmiaefvp3" path="res://assets/scenes/camera/default_tween.tres" id="3_isk4d"]
+[ext_resource type="FontFile" uid="uid://blv7p8atsq6wr" path="res://assets/fonts/bookantiqua_bold.ttf" id="5_isk4d"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_thv28"]
 animations = [{
@@ -20,15 +23,38 @@ size = Vector2(400, 200)
 [node name="akyra_npc" type="Node2D"]
 script = ExtResource("1_42gci")
 
+[node name="NpcPCam" type="Node2D" parent="." node_paths=PackedStringArray("follow_target")]
+top_level = true
+position = Vector2(-100, -150)
+script = ExtResource("2_r2ot1")
+follow_mode = 2
+follow_target = NodePath("..")
+tween_resource = ExtResource("3_isk4d")
+follow_offset = Vector2(-100, -150)
+draw_limits = true
+metadata/_custom_type_script = "uid://bhexx6mj1xv3q"
+
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_thv28")
 offset = Vector2(0, -100)
 
-[node name="Area2D" type="Area2D" parent="."]
+[node name="InteractBox" type="Area2D" parent="."]
 collision_layer = 4
 collision_mask = 2
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractBox"]
 position = Vector2(0, -100)
 shape = SubResource("RectangleShape2D_k7hja")
 debug_color = Color(0.309804, 0.85098, 0, 0.0980392)
+
+[node name="InteractLabel" type="Label" parent="."]
+offset_left = -125.0
+offset_top = -300.0
+offset_right = 125.0
+offset_bottom = -245.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("5_isk4d")
+theme_override_font_sizes/font_size = 45
+text = "[E] Interact"
+horizontal_alignment = 1
