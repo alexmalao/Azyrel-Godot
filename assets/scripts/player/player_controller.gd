@@ -359,8 +359,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		return project_vectors(self._velocity, self._get_floor_slope())
 
 	## executing jump, allow vertical momentum for a frame.
-	if ((-self._velocity.y > abs(self._velocity.x) + 100.0 or self.move_data.edge_jump)
-		and self.move_data.last_frame_grounded):
+	if self.move_data.edge_jump and self.move_data.last_frame_grounded:
 		return self._velocity
 	
 	var min_ground_speed: float = props.MIN_GROUND_SPEED

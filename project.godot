@@ -31,7 +31,8 @@ directories/dtl_directory={
 "akyra_tutor1_open": "res://assets/scenes/dialogue/akyra_tutor1_open.dtl",
 "akyra_tutor2_open": "res://assets/scenes/dialogue/akyra_tutor2_open.dtl",
 "akyra_tutor3_open": "res://assets/scenes/dialogue/akyra_tutor3_open.dtl",
-"akyra_tutor4_open": "res://assets/scenes/dialogue/akyra_tutor4_open.dtl"
+"akyra_tutor4_open": "res://assets/scenes/dialogue/akyra_tutor4_open.dtl",
+"akyra_tutor5_open": "res://assets/scenes/dialogue/akyra_tutor5_open.dtl"
 }
 layout/style_list=[]
 layout/default_style="res://assets/scenes/dialogue/default_style.tres"
