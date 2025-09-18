@@ -204,8 +204,8 @@ func update_position(delta: float) -> void:
 					result.position.y - grace_offset.y,
 				)
 				colliding = true
-				print(to_pos - result.position)
-				print(result.normal.orthogonal())
+				# print(to_pos - result.position)
+				# print(result.normal.orthogonal())
 				delta_vel = self.project_vectors(to_pos - result.position, result.normal.orthogonal())
 			idx += 1
 
@@ -235,11 +235,11 @@ func update_move(delta: float):
 	elif self.move_data.on_left_wall:
 		self._velocity = self._get_wall_move(delta, move_input, -1)
 	elif self._is_grounded() or self.move_data.last_frame_grounded:
-		self._project_wall()
 		self._velocity = self._get_ground_move(delta, move_input)
-	else:
 		self._project_wall()
+	else:
 		self._velocity = self._get_airborne_move(delta, move_input)
+		self._project_wall()
 	
 	self.move_and_slide()
 
@@ -516,7 +516,7 @@ func _is_grounded() -> bool:
 func _project_wall():
 	if self._is_touching_wall(1) and self._velocity.x > 0.1:
 		self._velocity = self.project_vectors(self._velocity, self._get_wall_slope(1))
-	if self._is_touching_wall(-1) and self._velocity.x < -0.1: 
+	if self._is_touching_wall(-1) and self._velocity.x < -0.1:
 		self._velocity = self.project_vectors(self._velocity, self._get_wall_slope(-1))
 
 
