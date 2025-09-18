@@ -17,6 +17,7 @@ class_name PlayerMoveData
 # duration based values
 @export var dashing: bool = false
 @export var wall_running: bool = false
+@export var ground_vaulted: bool = false
 @export var wall_vaulted: bool = false
 @export var ceiling_sliding: bool = false
 

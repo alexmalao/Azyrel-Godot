@@ -11,8 +11,9 @@ var player_input: PlayerInput
 
 var _velocity: Vector2
 
-@export var char_width: float = 98
-@export var char_height: float = 188
+@export var char_width: float = 100
+@export var char_height: float = 200
+@export var grace_pixel: float = 0.001
 @onready var _sprite = $AnimatedSprite2D
 
 
@@ -161,44 +162,63 @@ func short_jump():
 
 
 ## Update the position of the player
-func update_position(delta: float):
+func update_position(delta: float) -> void:
 	var space_state: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
 	# corner positions relative to character height and width
-	var corner_offsets: Array[Vector2] = [
+	var grace_offsets: Array[Vector2] = [
 		Vector2(self.char_width / 2, 0),
 		Vector2(-self.char_width / 2, 0),
+		Vector2(self.char_width / 2, -self.char_height / 2),
+		Vector2(-self.char_width / 2, -self.char_height / 2),
 		Vector2(self.char_width / 2, -self.char_height),
 		Vector2(-self.char_width / 2, -self.char_height),
 	]
+	var corner_offsets: Array[Vector2] = [
+		Vector2(self.char_width / 2 - self.grace_pixel, -self.grace_pixel),
+		Vector2(-self.char_width / 2 + self.grace_pixel, -self.grace_pixel),
+		Vector2(self.char_width / 2 - self.grace_pixel, (-self.char_height + self.grace_pixel) / 2),
+		Vector2(-self.char_width / 2 + self.grace_pixel, (-self.char_height + self.grace_pixel) / 2),
+		Vector2(self.char_width / 2 - self.grace_pixel, -self.char_height + self.grace_pixel),
+		Vector2(-self.char_width / 2 + self.grace_pixel, -self.char_height + self.grace_pixel),
+	]
 
 	var colliding: bool = true
-	var frame_vel: Vector2 = self._velocity * delta
+	var delta_vel: Vector2 = self._velocity * delta
 	while colliding:
 		# use velocity raycasts for continuous collision detection
 		colliding = false
+		var idx: int = 0
 		for offset in corner_offsets:
+			var grace_offset: Vector2 = grace_offsets[idx]
 			# store the new position to calculate leftover velocity
-			var to_pos: Vector2 = Vector2(self.position.x + offset.x + frame_vel.x,
-										  self.position.y + offset.y + frame_vel.y)
-			var br_query = PhysicsRayQueryParameters2D.create(
-				Vector2(self.position.x + offset.x, self.position.y + offset.y),
-				to_pos,
-				1)
-			var result: Dictionary = space_state.intersect_ray(br_query)
+			var from_pos: Vector2 = Vector2(self.position.x + offset.x,
+											self.position.y + offset.y)
+			var to_pos: Vector2 = Vector2(self.position.x + offset.x + delta_vel.x,
+										  self.position.y + offset.y + delta_vel.y)
+			var query = PhysicsRayQueryParameters2D.create(
+				from_pos, to_pos, 1)
+			var result: Dictionary = space_state.intersect_ray(query)
 			if result:
 				self.position = Vector2(
-					result.position.x - offset.x,
-					result.position.y - offset.y,
+					result.position.x - grace_offset.x,
+					result.position.y - grace_offset.y,
 				)
 				colliding = true
-				frame_vel = self.project_vectors(to_pos - result.position, result.normal.orthogonal())
+				print(to_pos - result.position)
+				print(result.normal.orthogonal())
+				delta_vel = self.project_vectors(to_pos - result.position, result.normal.orthogonal())
+			idx += 1
 
-	self.position = Vector2(self.position.x + self._velocity.x * delta,
-							self.position.y + self._velocity.y * delta)
+	self.position = Vector2(self.position.x + delta_vel.x,
+							self.position.y + delta_vel.y)
 
 
 ## Move the player horizontally.
 func update_move(delta: float):
+
+	if self._is_airborne() and self.move_data.edge_jump:
+		self._edge_jump(-props.JUMP_VEL)
+		self.move_data.edge_jump = false
 	# Add the gravity.
 	if self._is_airborne() and not self.move_data.dashing:
 		self._velocity.y += gravity * delta
@@ -270,15 +290,19 @@ func _update_state() -> void:
 
 ## Perform any grounded jump.
 func _ground_jump(jump_vel: float) -> void:
-	if self._is_grounded() or self.move_data.edge_jump:
+	if self._is_grounded():
 		jump_vel = min(jump_vel, self._velocity.y)
 		self._velocity = Vector2(self._velocity.x, jump_vel)
 		self.move_data.dashing = false
+		self.move_data.edge_jump = false
 	
-	# delay disabling edge jump by 2 frames to allow ground jumping
-	await get_tree().process_frame
-	await get_tree().process_frame
-	await get_tree().process_frame
+	self._ground_vault()
+
+
+func _edge_jump(jump_vel: float) -> void:
+	jump_vel = min(jump_vel, self._velocity.y)
+	self._velocity = Vector2(self._velocity.x, jump_vel)
+	self.move_data.dashing = false
 	self.move_data.edge_jump = false
 
 
@@ -362,7 +386,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		return project_vectors(self._velocity, self._get_floor_slope())
 
 	## executing jump, allow vertical momentum for a frame.
-	if self.move_data.edge_jump:
+	if self.move_data.ground_vaulted:
 		return self._velocity
 	
 	var min_ground_speed: float = props.MIN_GROUND_SPEED
@@ -561,6 +585,13 @@ func _wall_vault() -> void:
 	self.move_data.wall_vaulted = true
 	await get_tree().process_frame
 	self.move_data.wall_vaulted = false
+
+
+## Toggle grond_jump for a frame to prevent sticking to ground
+func _ground_vault() -> void:
+	self.move_data.ground_vaulted = true
+	await get_tree().create_timer(0.1).timeout
+	self.move_data.ground_vaulted = false
 
 
 ## Suspend ceiling friction for a set amount of time.
