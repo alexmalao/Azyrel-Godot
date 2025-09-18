@@ -1,0 +1,50 @@
+[gd_scene load_steps=7 format=3 uid="uid://bb3mlt16f4vpo"]
+
+[ext_resource type="Script" uid="uid://c5crxa1c08j6d" path="res://assets/scripts/player/player_controller.gd" id="1_eqrl5"]
+[ext_resource type="Texture2D" uid="uid://c1ggsmqp14mu2" path="res://assets/sprites/characters/azyrel/azyrel_run.png" id="2_fwohp"]
+[ext_resource type="PackedScene" uid="uid://b1cgm6ob3p05g" path="res://assets/scenes/player_input.tscn" id="3_v45wy"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_a84gp"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_fwohp")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qt236"]
+size = Vector2(100, 100)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_eqrl5"]
+size = Vector2(100, 200)
+
+[node name="PhysicsMan" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_eqrl5")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+z_index = 10
+y_sort_enabled = true
+position = Vector2(0, -100)
+sprite_frames = SubResource("SpriteFrames_a84gp")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="PlayerInput" parent="." instance=ExtResource("3_v45wy")]
+
+[node name="InteractBox" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractBox"]
+position = Vector2(0, -100)
+shape = SubResource("RectangleShape2D_qt236")
+debug_color = Color(0.294419, 0.629214, 1.34766e-06, 0.42)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -100)
+shape = SubResource("RectangleShape2D_eqrl5")

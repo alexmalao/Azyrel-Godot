@@ -193,8 +193,8 @@ func update_position(delta: float):
 				colliding = true
 				frame_vel = self.project_vectors(to_pos - result.position, result.normal.orthogonal())
 
-	self.position = Vector2(self.position.x + self._velocity.x * delta,
-							self.position.y + self._velocity.y * delta)
+	self.position = Vector2(self.position.x + frame_vel.x,
+							self.position.y + frame_vel.y)
 
 
 ## Move the player horizontally.
