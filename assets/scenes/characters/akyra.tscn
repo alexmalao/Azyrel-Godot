@@ -40,33 +40,35 @@ shape = SubResource("RectangleShape2D_va5is")
 [node name="PlayerInput" parent="." instance=ExtResource("3_2tam0")]
 
 [node name="RightRaycast1" type="RayCast2D" parent="."]
+position = Vector2(0, -1)
 target_position = Vector2(60, 0)
 
 [node name="RightRaycast2" type="RayCast2D" parent="."]
-position = Vector2(0, -180)
+position = Vector2(0, -179)
 target_position = Vector2(60, 0)
 
 [node name="LeftRaycast1" type="RayCast2D" parent="."]
+position = Vector2(0, -1)
 target_position = Vector2(-60, 0)
 
 [node name="LeftRaycast2" type="RayCast2D" parent="."]
-position = Vector2(0, -180)
+position = Vector2(0, -179)
 target_position = Vector2(-60, 0)
 
 [node name="UpRaycast1" type="RayCast2D" parent="."]
-position = Vector2(-50, -140)
+position = Vector2(-49, -130)
 target_position = Vector2(0, -60)
 
 [node name="UpRaycast2" type="RayCast2D" parent="."]
-position = Vector2(50, -140)
+position = Vector2(49, -130)
 target_position = Vector2(0, -60)
 
 [node name="DownRaycast1" type="RayCast2D" parent="."]
-position = Vector2(-50, -50)
+position = Vector2(-49, -50)
 target_position = Vector2(0, 60)
 
 [node name="DownRaycast2" type="RayCast2D" parent="."]
-position = Vector2(50, -50)
+position = Vector2(49, -50)
 target_position = Vector2(0, 60)
 
 [node name="InteractBox" type="Area2D" parent="."]

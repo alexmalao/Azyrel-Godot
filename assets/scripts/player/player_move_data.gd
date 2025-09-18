@@ -26,8 +26,6 @@ class_name PlayerMoveData
 @export var last_frame_airborne: bool = false
 @export var _grounded: bool = false  # soley used to calculate last frame grounded
 @export var last_frame_grounded: bool = false
-@export var _vel: Vector2 = Vector2(0, 0)  # soley used to calculate last frame velocity
-@export var last_frame_vel: Vector2 = Vector2(0, 0)
 
 
 # Called when the node enters the scene tree for the first time.
@@ -74,7 +72,6 @@ func reset_jumps(total_jumps: int):
 
 ## Determine whether a jump is possible, then decrement the available jumps.
 func attempt_jump():
-	print(self.cur_jumps)
 	if self.cur_jumps > 0:
 		self.cur_jumps -= 1
 		return true
