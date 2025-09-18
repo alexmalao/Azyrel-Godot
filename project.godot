@@ -173,3 +173,9 @@ dialogic_default_action={
 2d/physics_engine="GodotPhysics2D"
 3d/default_gravity=980.0
 2d/default_gravity=4000.0
+
+[rendering]
+
+environment/defaults/default_clear_color=Color(0.375757, 0.634418, 0.734723, 1)
+anti_aliasing/quality/use_taa=true
+environment/quality/use_taa=true

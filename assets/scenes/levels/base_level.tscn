@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://dbn6gtto24nvo"]
+
+[ext_resource type="TileSet" uid="uid://ddp1eh6i4nra3" path="res://assets/scenes/tileset/basic_tileset.tres" id="1_m426i"]
+[ext_resource type="PackedScene" uid="uid://ch0ce8h3fk51l" path="res://assets/scenes/characters/azyrel.tscn" id="1_wnvw8"]
+
+[node name="BaseLevel" type="Node2D"]
+
+[node name="Ground" type="TileMapLayer" parent="."]
+tile_set = ExtResource("1_m426i")
+
+[node name="azyrel" parent="." instance=ExtResource("1_wnvw8")]
+position = Vector2(100, 0)
+
+[node name="Camera2D" type="Camera2D" parent="azyrel"]
+position = Vector2(-3, -260)
+zoom = Vector2(0.5, 0.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 10.0

@@ -373,8 +373,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
-		if move_input.x == 0:
-			move_input.x = 1 if ground_slope.y > 0 else -1
+		move_input.x = 1 if ground_slope.y > 0 else -1
 		mod_magnitude = rel_magnitude + move_input.x * props.SLIDE_ACCEL * delta
 		min_ground_speed = props.MIN_SLIDE_SPEED
 		max_ground_speed = props.MAX_SLIDE_SPEED

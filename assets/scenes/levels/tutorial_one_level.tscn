@@ -44,3 +44,8 @@ dialogue_cont = "akyra_tutor4_open"
 position = Vector2(14400, -4800)
 dialogue_open = "akyra_tutor5_open"
 dialogue_cont = "akyra_tutor5_open"
+
+[node name="akyra_npc6" parent="." instance=ExtResource("3_t4lbi")]
+position = Vector2(17250, -6100)
+dialogue_open = "akyra_tutor1_open"
+dialogue_cont = "akyra_tutor1_open"
