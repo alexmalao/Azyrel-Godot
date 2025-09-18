@@ -11,8 +11,8 @@ var player_input: PlayerInput
 
 var _velocity: Vector2
 
-@export var char_width: float = 100
-@export var char_height: float = 190
+@export var char_width: float = 98
+@export var char_height: float = 188
 @onready var _sprite = $AnimatedSprite2D
 
 
@@ -362,7 +362,7 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 		return project_vectors(self._velocity, self._get_floor_slope())
 
 	## executing jump, allow vertical momentum for a frame.
-	if self.move_data.edge_jump and self.move_data.last_frame_grounded:
+	if self.move_data.edge_jump:
 		return self._velocity
 	
 	var min_ground_speed: float = props.MIN_GROUND_SPEED
@@ -376,7 +376,6 @@ func _get_ground_move(delta: float, move_input: Vector2) -> Vector2:
 	# grounded horizontal movement only triggers when in same direction
 	# of current velocity
 	if is_equal_approx(abs(ground_slope.x), abs(ground_slope.y)) and move_input.y == 1:
-		# TODO: make holding down only apply at the correct times
 		if move_input.x == 0:
 			move_input.x = 1 if ground_slope.y > 0 else -1
 		if (move_input.x == 1 and ground_slope.y > 0) or (move_input.x == -1 and ground_slope.y < 0):
